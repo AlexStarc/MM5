@@ -1,4 +1,4 @@
-package mm5.gallery;
+package com.teleca.mm5.gallery;
 
 import android.app.Activity;
 import android.os.Bundle;
