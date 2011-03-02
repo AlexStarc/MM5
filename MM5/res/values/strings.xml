@@ -2,4 +2,5 @@
 <resources>
     <string name="hello">Hello World, gallery!</string>
     <string name="app_name">android_mm5</string>
+    <string name="content_service">content service to iterate with provider</string>
 </resources>

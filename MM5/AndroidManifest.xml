@@ -13,6 +13,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <service android:description="@string/content_service" android:name="GalleryContentService"></service>
     </application>
 </manifest>
