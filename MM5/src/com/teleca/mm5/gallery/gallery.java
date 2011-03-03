@@ -12,6 +12,7 @@ import android.util.Log;
 	   String description();
 	}
 
+// enum for available gallery views to be used in methods
 enum GalleryViews {
 	GALLERY_LIST,
 	GALLERY_THUMBNAILS,
