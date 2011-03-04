@@ -3,7 +3,6 @@ package com.teleca.mm5.gallery;
 import android.app.Activity;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
