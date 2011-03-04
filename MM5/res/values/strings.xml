@@ -3,5 +3,7 @@
     <string name="hello">Hello World, gallery!</string>
     <string name="app_name">android_mm5</string>
     <string name="content_service">content service to iterate with provider</string>
-    <string name="full_screen_view">Full Screen View</string>
+    <string name="Details">Details</string>
+    <string name="ListView">List View</string>
+    <string name="FullScreen">Full Screen</string>
 </resources>
