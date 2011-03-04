@@ -2,6 +2,7 @@ package com.teleca.mm5.gallery;
 
 import java.lang.annotation.*;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -33,9 +34,16 @@ public class gallery extends Activity {
 
     	Log.i( TAG, "Started" );
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
         
         /* start background work process execution */
         galleryWorkBg.execute(0);
+        
+        setContentView(R.layout.main);
+        /* Select media type (image/music) on the main view then start next activity  */
+        
+        /* onSlect start Thumbnails view of images */
+        Intent intent = new Intent(this, ThumbnailsView.class);
+        startActivity(intent);
+
     }
 }
