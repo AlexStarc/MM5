@@ -17,6 +17,7 @@ public class ThumbnailsView extends Activity {
 	private ImageAdapter mImageAdapter;
 	private int mCount;
 	private GridView gridview;
+	private int prevFocus;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -28,32 +29,23 @@ public class ThumbnailsView extends Activity {
         mCount = mImageAdapter.getCount();
 
         gridview = (GridView) findViewById(R.id.gridView1);
+        prevFocus = -1;
         
         gridview.setAdapter(mImageAdapter);
         gridview.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
  			@Override
 			public void onItemSelected(AdapterView<?> arg0, View view,
 					int mSelectItemId, long arg3) {
- 		    	TextView mNameOfFile;
- 		    	TextView mCountOfFiles;
- 		    	Resources mRes = getResources();
- 		    	//Images mImages;
- 		    	
- 		    	mImageAdapter.getItem(mSelectItemId);
- 		    	
- 		    	mNameOfFile = (TextView)findViewById(R.id.textView1);
- 		    	mNameOfFile.setText( mImageAdapter.getNameItemId(mSelectItemId, mRes));
- 		        
- 		    	mCountOfFiles = (TextView)findViewById(R.id.textView2);
- 		    	mCountOfFiles.setText(String.format("%d/%d", mSelectItemId + 1, mCount));
-
- 		    	ImageView imageView = (ImageView)gridview.getChildAt(mSelectItemId);
- 		    	imageView.setLayoutParams(new GridView.LayoutParams(100, 100));
+ 				update(mSelectItemId);
 			}
 
 			@Override
 			public void onNothingSelected(AdapterView<?> arg0) {
-				// TODO Auto-generated method stub
+ 		    	if( prevFocus != -1 ){
+ 		    		ImageView imageView = (ImageView)gridview.getChildAt(prevFocus);
+ 	 		    	imageView.setLayoutParams(new GridView.LayoutParams(60, 60));
+ 	 		    	prevFocus = -1;
+ 		    	}
 			}
 		});
 
@@ -63,10 +55,11 @@ public class ThumbnailsView extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1,
 					int mSelectItemId, long arg3) {
-				/*!! Intent intent = new Intent(this, DetaisView.class);
-                startActivity(intent);!!*/	
+				update(mSelectItemId);
 			}
 		});
+        
+
 
         Button mViewButton = (Button)findViewById(R.id.button1);
         mViewButton.setOnClickListener(new View.OnClickListener() {
@@ -83,6 +76,28 @@ public class ThumbnailsView extends Activity {
             	openOptionsMenu();
             }
         });
+    }
+
+    private void update(int mSelectItemId){
+    	TextView mNameOfFile;
+	    	TextView mCountOfFiles;
+	    	Resources mRes = getResources();
+	    	//Images mImages;
+
+	    	if( prevFocus != -1 ){
+	    		ImageView imageView = (ImageView)gridview.getChildAt(prevFocus);
+		    	imageView.setLayoutParams(new GridView.LayoutParams(60, 60));
+	    	}
+	    	
+	    	mNameOfFile = (TextView)findViewById(R.id.textView1);
+	    	mNameOfFile.setText( mImageAdapter.getNameItemId(mSelectItemId, mRes));
+	        
+	    	mCountOfFiles = (TextView)findViewById(R.id.textView2);
+	    	mCountOfFiles.setText(String.format("%d/%d", mSelectItemId + 1, mCount));
+
+	    	ImageView imageView = (ImageView)gridview.getChildAt(mSelectItemId);
+	    	imageView.setLayoutParams(new GridView.LayoutParams(100, 100));
+	    	prevFocus = mSelectItemId;
     }
 
     @Override
