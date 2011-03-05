@@ -54,14 +54,15 @@ public class ImageAdapter extends BaseAdapter  {
         if (convertView == null) { 
             imageView = new ImageView(mContext);
             imageView.setLayoutParams(new GridView.LayoutParams(60, 60));
-            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER );
         } else {
             imageView = (ImageView) convertView;
         }
         
+        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER );
         if( position < mCountDefaultWallpapers ){
         	imageView.setImageResource(mDefaultWallpapers[position]);
         }
+
         return imageView;
 	}
 	
