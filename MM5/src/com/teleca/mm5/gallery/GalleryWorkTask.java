@@ -47,7 +47,7 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
     /** below function contents get executed in a separate thread */
     @Override
     protected GalleryWorkTaskResult doInBackground(GalleryWorkTaskContentType... type) {
-        GalleryWorkTaskResult resultProcessing;
+        GalleryWorkTaskResult resultProcessing = GalleryWorkTaskResult.GALLERY_RESULT_ERROR;
         String mediaStorageState = Environment.getExternalStorageState();
 
         Log.i( TAG, "work task bg processing started with media state " + mediaStorageState);
@@ -95,13 +95,13 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
                     recordsAvailable = mainContentCursor.moveToFirst();
                     contentCount = mainContentCursor.getCount();
 
-                    if( recordsAvailable && 0 <= contentCount ) {
+                    if( recordsAvailable && 0 < contentCount ) {
                         nameColumn = mainContentCursor.getColumnIndex(type[0] == GalleryWorkTaskContentType.GALLERY_AUDIO ?
-                                MediaStore.Audio.Media.DISPLAY_NAME :
-                                    MediaStore.Images.Media.DISPLAY_NAME);
+                                                                                                                           MediaStore.Audio.Media.DISPLAY_NAME :
+                                                                                                                               MediaStore.Images.Media.DISPLAY_NAME);
                         dataColumn = mainContentCursor.getColumnIndex(type[0] == GalleryWorkTaskContentType.GALLERY_AUDIO ?
-                                MediaStore.Audio.Media.DATA :
-                                    MediaStore.Images.Media.DATA);
+                                                                                                                           MediaStore.Audio.Media.DATA :
+                                                                                                                               MediaStore.Images.Media.DATA);
 
                         resultingContentList = new GalleryContentItem[contentCount];
 
@@ -114,17 +114,24 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
                             resultingContentList[i] = new GalleryContentItem( BitmapFactory.decodeStream( new FileInputStream( assetData ) ),
                                                                               name );
                         } while( mainContentCursor.moveToNext() && i < contentCount );
+
+                        // processing finished
+                        resultProcessing = GalleryWorkTaskResult.GALLERY_RESULT_FINISHED;
                     } else {
+                        // set empty status
+                        resultProcessing = GalleryWorkTaskResult.GALLERY_RESULT_EMPTY;
+
                         Log.e( TAG, "No records available!");
                     }
+
+                    mainContentCursor.close();
                 }
                 catch(Exception e) {
                     Log.e( TAG, "something wrong with the base: " + e.getClass() + " thrown " + e.getMessage());
                 }
             }
         }
-        // set processing end result
-        resultProcessing = GalleryWorkTaskResult.GALLERY_RESULT_FINISHED;
+
         return resultProcessing;
     }
 

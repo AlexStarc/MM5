@@ -60,14 +60,15 @@ public class gallery extends Activity implements GalleryView {
 
     @Override
     public void finishedWorkExecution( GalleryWorkTaskResult processingResult ) {
+        /** Here all items received by view via ArrayList. It get called just before finishedWorkExecution;
+         *  Contents of view might needs to be updated only after status received via finishedWorkExecution */
+        // TODO: provide list updating
         Log.i( TAG, "BG work has finished with " + processingResult );
     }
 
     @Override
     public void setContentList( GalleryContentItem[] contentArray ) {
-        /** Here all items received by view via ArrayList. It get called just before finishedWorkExecution;
-         *  Contents of view might needs to be updated only after status received via finishedWorkExecution */
-        // TODO: provide list updating
+        // TODO Store received list
     }
 
     @Override
