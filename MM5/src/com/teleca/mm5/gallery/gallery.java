@@ -1,7 +1,9 @@
 package com.teleca.mm5.gallery;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,7 +15,8 @@ import android.util.Log;
 	   String description();
 	}
 
-enum GalleryViews {
+// enum for available gallery views to be used in methods
+enum GalleryViewTypes {
 	GALLERY_LIST,
 	GALLERY_THUMBNAILS,
 	GALLERY_FULLSCREEN,
@@ -22,9 +25,20 @@ enum GalleryViews {
 
 @ClassPreamble (
 		author = "Alexander Starchenko",
+                description = "interface for view for interaction with GalleryWorkTask task"
+)
+interface GalleryView {
+    public void progressWorkExecution( int NumberFiles );
+    public void finishedWorkExecution( GalleryWorkTaskResult processingResult );
+    public void setContentList( GalleryContentItem[] contentArray );
+    public Context getGalleryViewContext();
+}
+
+@ClassPreamble (
+                author = "Alexander Starchenko",
 		description = "main applet class"
 	)
-public class gallery extends Activity {
+public class gallery extends Activity implements GalleryView {
 	private static final String TAG = "gallery";
 	
     /** Called when the activity is first created. */
@@ -34,16 +48,36 @@ public class gallery extends Activity {
 
     	Log.i( TAG, "Started" );
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
         
         /* start background work process execution */
-        galleryWorkBg.execute(0);
-        
-        setContentView(R.layout.main);
-        /* Select media type (image/music) on the main view then start next activity  */
-        
+        galleryWorkBg.execute(GalleryWorkTaskContentType.GALLERY_IMAGES);
+
         /* onSlect start Thumbnails view of images */
         Intent intent = new Intent(this, ThumbnailsView.class);
         startActivity(intent);
+    }
 
+    @Override
+    public void progressWorkExecution( int NumberFiles ) {
+        Log.i( TAG, "BG work has" + NumberFiles );
+    }
+
+    @Override
+    public void finishedWorkExecution( GalleryWorkTaskResult processingResult ) {
+        /** Here all items received by view via ArrayList. It get called just before finishedWorkExecution;
+         *  Contents of view might needs to be updated only after status received via finishedWorkExecution */
+        // TODO: provide list updating
+        Log.i( TAG, "BG work has finished with " + processingResult );
+    }
+
+    @Override
+    public void setContentList( GalleryContentItem[] contentArray ) {
+        // TODO Store received list
+    }
+
+    @Override
+    public Context getGalleryViewContext() {
+        return getApplicationContext();
     }
 }
