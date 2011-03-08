@@ -1,6 +1,7 @@
 package com.teleca.mm5.gallery;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.Menu;
@@ -13,48 +14,17 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ThumbnailsView extends Activity {
+public class ThumbnailsView extends Activity implements GalleryView{
     private ImageAdapter mImageAdapter;
     private GridView gridview;
-    public static final String EXT_GELLERYCONTENT = "GalleryContent";
+    private GalleryContentItem[] contentThumbnailsArray;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        GalleryWorkTask galleryWorkBg = new GalleryWorkTask(this);
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.thumbnails);
-        //// Bundle extras = getIntent().getExtras();
-
-        ////GalleryContentItem[] resultingContentList = ( GalleryContentItem[] )extras.get(EXT_GELLERYCONTENT);
-        GalleryContentItem[] resultingContentList = gallery.getContentList();
-        mImageAdapter = new ImageAdapter(this, resultingContentList);
-
-
-        gridview = (GridView) findViewById(R.id.gridView1);
-        gridview.setAdapter(mImageAdapter);
-
-        gridview.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> arg0, View view,
-                    int mSelectItemId, long arg3) {
-                update(mSelectItemId);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> arg0) {
-
-            }
-        });
-
-        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> arg0, View arg1,
-                    int mSelectItemId, long arg3) {
-                update(mSelectItemId);
-                gridview.setSelection(mSelectItemId);
-            }
-        });
 
         Button mViewButton = (Button)findViewById(R.id.button1);
         mViewButton.setOnClickListener(new View.OnClickListener() {
@@ -73,6 +43,8 @@ public class ThumbnailsView extends Activity {
                 openOptionsMenu();
             }
         });
+
+        galleryWorkBg.execute(GalleryWorkTaskContentType.GALLERY_IMAGES);
     }
 
     private void update(int mSelectItemId){
@@ -97,7 +69,6 @@ public class ThumbnailsView extends Activity {
 
         mResizeImage.setX(( locationImageVoew[0] - locationGridVoew[0] ));
         mResizeImage.setY(( locationImageVoew[1] - locationGridVoew[1] ));
-
     }
 
     @Override
@@ -128,6 +99,56 @@ public class ThumbnailsView extends Activity {
         default:
             return false;
         }
+    }
+
+    @Override
+    public void progressWorkExecution(int NumberFiles) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void finishedWorkExecution(GalleryWorkTaskResult processingResult) {
+        // store status of processing
+        if( GalleryWorkTaskResult.GALLERY_RESULT_FINISHED == processingResult ) {
+            mImageAdapter = new ImageAdapter(this, contentThumbnailsArray);
+
+            gridview = (GridView) findViewById(R.id.gridView1);
+            gridview.setAdapter(mImageAdapter);
+
+            gridview.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> arg0, View view,
+                                           int mSelectItemId, long arg3) {
+                    update(mSelectItemId);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> arg0) {
+
+                }
+            });
+
+            gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                @Override
+                public void onItemClick(AdapterView<?> arg0, View arg1,
+                                        int mSelectItemId, long arg3) {
+                    update(mSelectItemId);
+                    gridview.setSelection(mSelectItemId);
+                }
+            });
+        }
+    }
+
+    @Override
+    public void setContentList(GalleryContentItem[] contentArray) {
+        // store content list
+        contentThumbnailsArray = contentArray.clone();
+    }
+
+    @Override
+    public Context getGalleryViewContext() {
+        return getApplicationContext();
     }
 }
 

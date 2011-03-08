@@ -104,6 +104,8 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
 
                         resultingContentList = new GalleryContentItem[contentCount];
 
+                        i = 0;
+
                         do {
                             name = mainContentCursor.getString(nameColumn);
                             assetData = mainContentCursor.getString(dataColumn);
@@ -112,6 +114,7 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
                             // Here we're assuming that DATA stores PATH and try it queue
                             resultingContentList[i] = new GalleryContentItem( BitmapFactory.decodeStream( new FileInputStream( assetData ) ),
                                                                               name );
+                            i++;
                         } while( mainContentCursor.moveToNext() && i < contentCount );
 
                         // processing finished
