@@ -32,6 +32,7 @@ interface GalleryView {
     public void finishedWorkExecution( GalleryWorkTaskResult processingResult );
     public void setContentList( GalleryContentItem[] contentArray );
     public Context getGalleryViewContext();
+    ///public GalleryContentItem[] getContentList();
 }
 
 @ClassPreamble (
@@ -40,6 +41,8 @@ interface GalleryView {
 	)
 public class gallery extends Activity implements GalleryView {
 	private static final String TAG = "gallery";
+	private static GalleryContentItem[] resultingContentList;
+	
 	
     /** Called when the activity is first created. */
     @Override
@@ -53,9 +56,7 @@ public class gallery extends Activity implements GalleryView {
         /* start background work process execution */
         galleryWorkBg.execute(GalleryWorkTaskContentType.GALLERY_IMAGES);
 
-        /* onSlect start Thumbnails view of images */
-        Intent intent = new Intent(this, ThumbnailsView.class);
-        startActivity(intent);
+
     }
 
     @Override
@@ -73,11 +74,30 @@ public class gallery extends Activity implements GalleryView {
 
     @Override
     public void setContentList( GalleryContentItem[] contentArray ) {
-        // TODO Store received list
+    	setResultingContentList(contentArray);
     }
 
     @Override
     public Context getGalleryViewContext() {
         return getApplicationContext();
     }
+
+	public void setResultingContentList(GalleryContentItem[] mresultingContentList) {
+		resultingContentList = mresultingContentList;
+		
+        /* onSlect start Thumbnails view of images */
+        Intent intent = new Intent(this, ThumbnailsView.class);
+       ///intent.putExtra(ThumbnailsView.EXT_GELLERYCONTENT, resultingContentList);
+
+        startActivity(intent);
+	}
+
+	public GalleryContentItem[] getResultingContentList() {
+		return resultingContentList;
+	}
+	
+	public static GalleryContentItem[] getContentList() {
+		return resultingContentList;
+	}
+	
 }

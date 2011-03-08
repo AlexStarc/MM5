@@ -16,15 +16,20 @@ import android.widget.TextView;
 public class ThumbnailsView extends Activity {
 	private ImageAdapter mImageAdapter;
 	private GridView gridview;
+	public static final String EXT_GELLERYCONTENT = "GalleryContent";
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
         setContentView(R.layout.thumbnails);
-		
-        mImageAdapter = new ImageAdapter(this);
+       //// Bundle extras = getIntent().getExtras();
 
+        ////GalleryContentItem[] resultingContentList = ( GalleryContentItem[] )extras.get(EXT_GELLERYCONTENT);
+        GalleryContentItem[] resultingContentList = gallery.getContentList();
+        mImageAdapter = new ImageAdapter(this, resultingContentList);
+
+        
         gridview = (GridView) findViewById(R.id.gridView1);
         gridview.setAdapter(mImageAdapter);
 
