@@ -11,14 +11,16 @@ import android.widget.ImageView;
 public class ImageAdapter extends BaseAdapter  {
 	private Context mContext;
 	private int mCountDefaultWallpapers;
+	private GalleryContentItem[] mGalleryContentItem;
 
-	public ImageAdapter( Context mDataContext ){
+	public ImageAdapter( Context mDataContext, GalleryContentItem[] GalleryContentItem ){
 		mContext = mDataContext;
 		mCountDefaultWallpapers = mDefaultWallpapers.length;
+		mGalleryContentItem = GalleryContentItem;
 	}
 	
 	public int getCount(){
-		return mCountDefaultWallpapers;
+		return /*mGalleryContentItem.length + */getCountDefaultWallpapers()+1;
 	}
 	
 	public int getCountDefaultWallpapers(){
@@ -33,7 +35,12 @@ public class ImageAdapter extends BaseAdapter  {
 
 	@Override
 	public long getItemId(int position) {
-		return mDefaultWallpapers[position];
+		if( position < mCountDefaultWallpapers ){
+			return mDefaultWallpapers[position];
+		}
+		else {
+			return 0;
+		}
 	}
 	
 	public String getNameItemId(int position, Resources mRes){
@@ -42,6 +49,9 @@ public class ImageAdapter extends BaseAdapter  {
 		if( position < mCountDefaultWallpapers &&
 			mRes != null){
 			mNameFile = mRes.getResourceEntryName((int) mDefaultWallpapers[position]);
+		}
+		else if( 18 == position ){
+			mNameFile = mGalleryContentItem[position-mCountDefaultWallpapers].getContentName();
 		}
 		
 		return mNameFile;
@@ -54,13 +64,19 @@ public class ImageAdapter extends BaseAdapter  {
         if (convertView == null) { 
             imageView = new ImageView(mContext);
             imageView.setLayoutParams(new GridView.LayoutParams(60, 60));
-            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER );
         } else {
             imageView = (ImageView) convertView;
         }
         
+        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER );
+
         if( position < mCountDefaultWallpapers ){
         	imageView.setImageResource(mDefaultWallpapers[position]);
+        }
+        else if( 18 == position ){
+
+        		imageView.setImageBitmap(mGalleryContentItem[position - mCountDefaultWallpapers].getContentBitmap());
+
         }
         return imageView;
 	}

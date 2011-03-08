@@ -16,6 +16,7 @@
             	android:text="0/0">
             </TextView>
         </RelativeLayout>
+
         	<GridView 
         		android:layout_width="wrap_content" 
         		android:id="@+id/gridView1" 
@@ -27,8 +28,22 @@
         		android:numColumns="auto_fit"
         		android:verticalSpacing="5dp"
     			android:horizontalSpacing="5dp"
-    			android:stretchMode="columnWidth" android:focusableInTouchMode="true">
+    			android:stretchMode="columnWidth" 
+    			android:focusableInTouchMode="true" 
+    			android:drawSelectorOnTop="true"
+    			android:focusable="true"
+    			android:nextFocusDown="@+id/gridView1" 
+    			android:nextFocusForward="@+id/gridView1" 
+    			android:nextFocusRight="@+id/gridView1" 
+    			android:nextFocusUp="@+id/gridView1">
         	</GridView>
+        	<ImageView 
+        		android:layout_width="100dp" 
+        		android:id="@+id/imageView1" 
+        		android:layout_height="100dp" 
+        		android:layout_below="@+id/relativeLayout2" 
+        		android:layout_alignLeft="@+id/relativeLayout2">
+        	</ImageView>
         <RelativeLayout 
         	android:id="@+id/relativeLayout3" 
         	android:layout_height="wrap_content" 
@@ -49,4 +64,5 @@
             	android:id="@+id/button2">
             </Button>
         </RelativeLayout>
+
     </RelativeLayout>

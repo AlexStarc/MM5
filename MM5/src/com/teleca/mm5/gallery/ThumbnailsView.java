@@ -14,90 +14,90 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 public class ThumbnailsView extends Activity {
-	private ImageAdapter mImageAdapter;
-	private int mCount;
-	private GridView gridview;
-	private int prevFocus;
-	
+    private ImageAdapter mImageAdapter;
+    private GridView gridview;
+    public static final String EXT_GELLERYCONTENT = "GalleryContent";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         setContentView(R.layout.thumbnails);
-		
-        mImageAdapter = new ImageAdapter(this);
-        mCount = mImageAdapter.getCount();
+        //// Bundle extras = getIntent().getExtras();
+
+        ////GalleryContentItem[] resultingContentList = ( GalleryContentItem[] )extras.get(EXT_GELLERYCONTENT);
+        GalleryContentItem[] resultingContentList = gallery.getContentList();
+        mImageAdapter = new ImageAdapter(this, resultingContentList);
+
 
         gridview = (GridView) findViewById(R.id.gridView1);
-        prevFocus = -1;
-        
         gridview.setAdapter(mImageAdapter);
+
         gridview.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
- 			@Override
-			public void onItemSelected(AdapterView<?> arg0, View view,
-					int mSelectItemId, long arg3) {
- 				update(mSelectItemId);
-			}
+            @Override
+            public void onItemSelected(AdapterView<?> arg0, View view,
+                    int mSelectItemId, long arg3) {
+                update(mSelectItemId);
+            }
 
-			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
- 		    	if( prevFocus != -1 ){
- 		    		ImageView imageView = (ImageView)gridview.getChildAt(prevFocus);
- 	 		    	imageView.setLayoutParams(new GridView.LayoutParams(60, 60));
- 	 		    	prevFocus = -1;
- 		    	}
-			}
-		});
+            @Override
+            public void onNothingSelected(AdapterView<?> arg0) {
 
-        
+            }
+        });
+
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			
-			@Override
-			public void onItemClick(AdapterView<?> arg0, View arg1,
-					int mSelectItemId, long arg3) {
-				update(mSelectItemId);
-			}
-		});
-        
 
+            @Override
+            public void onItemClick(AdapterView<?> arg0, View arg1,
+                    int mSelectItemId, long arg3) {
+                update(mSelectItemId);
+                gridview.setSelection(mSelectItemId);
+            }
+        });
 
         Button mViewButton = (Button)findViewById(R.id.button1);
         mViewButton.setOnClickListener(new View.OnClickListener() {
+            @Override
             public void onClick(View v) {
-            	
-               /*!! Intent intent = new Intent(this, ThumbnailsView.class);
+
+                /*!! Intent intent = new Intent(this, ThumbnailsView.class);
                 startActivity(intent);!!*/
             }
         });
 
         Button mOptionsButton = (Button)findViewById(R.id.button2);
         mOptionsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
             public void onClick(View v) {
-            	openOptionsMenu();
+                openOptionsMenu();
             }
         });
     }
 
     private void update(int mSelectItemId){
-    	TextView mNameOfFile;
-	    	TextView mCountOfFiles;
-	    	Resources mRes = getResources();
-	    	//Images mImages;
+        TextView mTextView;
+        ImageView mResizeImage;
+        Resources mRes = getResources();
 
-	    	if( prevFocus != -1 ){
-	    		ImageView imageView = (ImageView)gridview.getChildAt(prevFocus);
-		    	imageView.setLayoutParams(new GridView.LayoutParams(60, 60));
-	    	}
-	    	
-	    	mNameOfFile = (TextView)findViewById(R.id.textView1);
-	    	mNameOfFile.setText( mImageAdapter.getNameItemId(mSelectItemId, mRes));
-	        
-	    	mCountOfFiles = (TextView)findViewById(R.id.textView2);
-	    	mCountOfFiles.setText(String.format("%d/%d", mSelectItemId + 1, mCount));
+        mTextView = (TextView)findViewById(R.id.textView1);
+        mTextView.setText( mImageAdapter.getNameItemId(mSelectItemId, mRes));
 
-	    	ImageView imageView = (ImageView)gridview.getChildAt(mSelectItemId);
-	    	imageView.setLayoutParams(new GridView.LayoutParams(100, 100));
-	    	prevFocus = mSelectItemId;
+        mTextView = (TextView)findViewById(R.id.textView2);
+        mTextView.setText(String.format("%d/%d", mSelectItemId + 1, mImageAdapter.getCount()));
+
+        ImageView imageView = (ImageView)gridview.getChildAt(mSelectItemId);
+
+        int[] locationImageVoew = new int[2];
+        int[] locationGridVoew = new int[2];
+        imageView.getLocationOnScreen(locationImageVoew);
+        gridview.getLocationOnScreen(locationGridVoew);
+
+        mResizeImage = (ImageView)mImageAdapter.getView( mSelectItemId, findViewById(R.id.imageView1), null);
+
+        mResizeImage.setX(( locationImageVoew[0] - locationGridVoew[0] ));
+        mResizeImage.setY(( locationImageVoew[1] - locationGridVoew[1] ));
+
     }
 
     @Override
@@ -106,24 +106,24 @@ public class ThumbnailsView extends Activity {
         inflater.inflate(R.menu.thubnail, menu);
         return true;
     }
-    
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
 
         switch (item.getItemId()) {
         case R.id.DETAILS_ID :
-        	/*!! Intent intent = new Intent(this, DetaisView.class);
+            /*!! Intent intent = new Intent(this, DetaisView.class);
             startActivity(intent);!!*/
             return true;
         case R.id.LISTVIEW_ID:
-        	/*!! Intent intent = new Intent(this, ListViewView.class);
+            /*!! Intent intent = new Intent(this, ListViewView.class);
             startActivity(intent);!!*/
             return true;
-            
+
         case R.id.FULLSCREEN_ID:
-        	/*!! Intent intent = new Intent(this, FullScreenView.class);
+            /*!! Intent intent = new Intent(this, FullScreenView.class);
             startActivity(intent);!!*/
-        	return true;
+            return true;
 
         default:
             return false;
