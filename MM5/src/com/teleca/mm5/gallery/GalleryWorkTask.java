@@ -12,7 +12,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 
-//enum for results of work task processing
+//enum for results of work task proccessing
 enum GalleryWorkTaskResult {
     GALLERY_RESULT_EMPTY,
     GALLERY_RESULT_FINISHED,
@@ -46,9 +46,10 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
 
     /** below function contents get executed in a separate thread */
     @Override
-    protected GalleryWorkTaskResult doInBackground(GalleryWorkTaskContentType... type) {
+    protected GalleryWorkTaskResult doInBackground(GalleryWorkTaskContentType... type) throws IllegalArgumentException {
         GalleryWorkTaskResult resultProcessing = GalleryWorkTaskResult.GALLERY_RESULT_ERROR;
         String mediaStorageState = Environment.getExternalStorageState();
+        Uri uriGalleryContent = null;
 
         Log.i( TAG, "work task bg processing started with media state " + mediaStorageState);
 
@@ -63,13 +64,11 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
 
             switch(type[0]) {
             case GALLERY_AUDIO:
+                uriGalleryContent = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
                 break;
 
             case GALLERY_IMAGES:
-                mainContentCursor = MediaStore.Images.Media.query(mainContentResolver,
-                                                                  MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                                                  null );
-
+                uriGalleryContent = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
                 break;
 
             default:
@@ -79,7 +78,7 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
 
             // here we get URI and ready to prepare query, however, need to cancel previous one
             if( null != mainContentResolver && null == mainContentCursor ) {
-                mainContentCursor = mainContentResolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, null);
+                mainContentCursor = mainContentResolver.query(uriGalleryContent, null, null, null, null);
             }
 
             if( null != mainContentCursor ) {
@@ -156,7 +155,7 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
     /**
      * @param parentGalleryView the parentGalleryView to set
      */
-    protected void setParentGalleryView(GalleryView parentGalleryView) {
+    protected final void setParentGalleryView(GalleryView parentGalleryView) {
         this.parentGalleryView = parentGalleryView;
 
         // get content provider here also
@@ -168,7 +167,12 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
     /**
      * @return the parentGalleryView
      */
-    protected GalleryView getParentGalleryView() {
+    protected final GalleryView getParentGalleryView() {
         return parentGalleryView;
+    }
+
+    @Override
+    public String toString() {
+        return ("GalleryWorkTask <" + parentGalleryView.toString() + ">");
     }
 }

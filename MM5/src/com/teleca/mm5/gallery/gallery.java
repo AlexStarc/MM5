@@ -4,6 +4,8 @@ import java.lang.annotation.Documented;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -39,6 +41,7 @@ interface GalleryView {
 )
 public class gallery extends Activity implements GalleryView {
     private static final String TAG = "gallery";
+    private AsyncTask<GalleryWorkTaskContentType, Integer, GalleryWorkTaskResult> galleryWorkBg;
 
     /** Called when the activity is first created. */
     @Override
@@ -47,10 +50,15 @@ public class gallery extends Activity implements GalleryView {
 
         Log.i( TAG, "Started" );
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
-
         /* start background work process execution */
         galleryWorkBg.execute(GalleryWorkTaskContentType.GALLERY_IMAGES);
+
+        setContentView(R.layout.main);
+        /* Select media type (image/music) on the main view then start next activity  */
+
+        /* onSlect start Thumbnails view of images */
+        Intent intent = new Intent(this, ThumbnailsView.class);
+        startActivity(intent);
     }
 
     @Override

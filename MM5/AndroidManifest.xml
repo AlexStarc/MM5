@@ -13,5 +13,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
+    <activity android:name="ThumbnailsView">
+        </activity>
+
+</application>
 </manifest>
