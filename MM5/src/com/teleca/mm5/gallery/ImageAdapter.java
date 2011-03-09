@@ -21,7 +21,7 @@ public class ImageAdapter extends BaseAdapter  {
 
     @Override
     public int getCount(){
-        return mGalleryContentItem.length + getCountDefaultWallpapers();
+        return ( mGalleryContentItem.length + getCountDefaultWallpapers() );
     }
 
     public int getCountDefaultWallpapers(){

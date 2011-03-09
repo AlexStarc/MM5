@@ -59,7 +59,7 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
                 parentGalleryView.getGalleryViewContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://"+ Environment.getExternalStorageDirectory())));
             }
             catch(Exception e) {
-                Log.e( TAG, "something wrong with sendBroadcast: " + e.getClass() + " thrown " + e.getMessage());
+                Log.e( TAG, "EXCEPTION: " + e.getClass() + " thrown " + e.getMessage());
             }
 
             switch(type[0]) {
@@ -72,7 +72,7 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
                 break;
 
             default:
-                Log.i( TAG, "incorrect parameter encounted" );
+                Log.i( TAG, "EXCEPTION: incorrect parameter encounted" );
                 throw new IllegalArgumentException("incorrect GalleryWorkTaskContentType passed by view");
             }
 
@@ -123,13 +123,13 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
                         // set empty status
                         resultProcessing = GalleryWorkTaskResult.GALLERY_RESULT_EMPTY;
 
-                        Log.e( TAG, "No records available!");
+                        Log.e( TAG, "No records available for requested content type");
                     }
 
                     mainContentCursor.close();
                 }
                 catch(Exception e) {
-                    Log.e( TAG, "something wrong with the base: " + e.getClass() + " thrown " + e.getMessage());
+                    Log.e( TAG, "EXCEPTION: " + e.getClass() + " thrown " + e.getMessage());
                 }
             }
         }

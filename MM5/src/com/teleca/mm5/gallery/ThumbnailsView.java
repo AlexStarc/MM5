@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,10 +19,12 @@ public class ThumbnailsView extends Activity implements GalleryView{
     private ImageAdapter mImageAdapter;
     private GridView gridview;
     private GalleryContentItem[] contentThumbnailsArray;
+    private GalleryWorkTask galleryWorkBg = null;
+    private static final String TAG = "ThumbnailsView";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        GalleryWorkTask galleryWorkBg = new GalleryWorkTask(this);
+        galleryWorkBg = new GalleryWorkTask(this);
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.thumbnails);
@@ -45,6 +48,18 @@ public class ThumbnailsView extends Activity implements GalleryView{
         });
 
         galleryWorkBg.execute(GalleryWorkTaskContentType.GALLERY_IMAGES);
+    }
+
+    @Override
+    protected void onDestroy() {
+        // need additional stop BG work task
+        try {
+            galleryWorkBg.cancel(true);
+        }
+        catch(Exception e) {
+            Log.e( TAG, "EXCEPTION: " + e.getClass() + " thrown " + e.getMessage());
+        }
+        super.onDestroy();
     }
 
     private void update(int mSelectItemId){
