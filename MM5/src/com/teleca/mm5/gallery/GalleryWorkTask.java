@@ -1,11 +1,8 @@
 package com.teleca.mm5.gallery;
 
-import java.io.FileInputStream;
-
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -34,7 +31,6 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
     private GalleryView parentGalleryView;
     ContentResolver mainContentResolver;
     Cursor mainContentCursor;
-    GalleryContentItem[] resultingContentList;
 
     /** Constructors of async gallery work task */
     public GalleryWorkTask() {
@@ -82,41 +78,14 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
             }
 
             if( null != mainContentCursor ) {
-                String name;
-                String assetData;
                 Boolean recordsAvailable = false;
-                int nameColumn = 0;
-                int dataColumn = 0;
                 int contentCount = 0;
-                int i = 0;
 
                 try {
                     recordsAvailable = mainContentCursor.moveToFirst();
                     contentCount = mainContentCursor.getCount();
 
                     if( recordsAvailable && 0 < contentCount ) {
-                        nameColumn = mainContentCursor.getColumnIndex(type[0] == GalleryWorkTaskContentType.GALLERY_AUDIO ?
-                                                                                                                           MediaStore.Audio.Media.DISPLAY_NAME :
-                                                                                                                               MediaStore.Images.Media.DISPLAY_NAME);
-                        dataColumn = mainContentCursor.getColumnIndex(type[0] == GalleryWorkTaskContentType.GALLERY_AUDIO ?
-                                                                                                                           MediaStore.Audio.Media.DATA :
-                                                                                                                               MediaStore.Images.Media.DATA);
-
-                        resultingContentList = new GalleryContentItem[contentCount];
-
-                        i = 0;
-
-                        do {
-                            name = mainContentCursor.getString(nameColumn);
-                            assetData = mainContentCursor.getString(dataColumn);
-                            Log.i(TAG, "content display name " + name);
-
-                            // Here we're assuming that DATA stores PATH and try it queue
-                            resultingContentList[i] = new GalleryContentItem( BitmapFactory.decodeStream( new FileInputStream( assetData ) ),
-                                                                              name );
-                            i++;
-                        } while( mainContentCursor.moveToNext() && i < contentCount );
-
                         // processing finished
                         resultProcessing = GalleryWorkTaskResult.GALLERY_RESULT_FINISHED;
                     } else {
@@ -125,8 +94,6 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
 
                         Log.e( TAG, "No records available for requested content type");
                     }
-
-                    mainContentCursor.close();
                 }
                 catch(Exception e) {
                     Log.e( TAG, "EXCEPTION: " + e.getClass() + " thrown " + e.getMessage());
@@ -147,9 +114,7 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
         Log.i( TAG, "bg processign finished, invoke back parent view" );
         /* Share execution resulted list with parent view,
          * where's no need to share it if its empty */
-        if( null != resultingContentList && 0 != resultingContentList.length ) {
-            parentGalleryView.setContentList(resultingContentList);
-        }
+        parentGalleryView.setContentCursor(mainContentCursor);
 
         /* Share status with parent view in order to notify about errors, if any */
         parentGalleryView.finishedWorkExecution(result);

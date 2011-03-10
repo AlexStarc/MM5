@@ -5,6 +5,7 @@ import java.lang.annotation.Documented;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -37,7 +38,7 @@ enum GalleryViewTypes {
 interface GalleryView {
     public void progressWorkExecution( int NumberFiles );
     public void finishedWorkExecution( GalleryWorkTaskResult processingResult );
-    public void setContentList( GalleryContentItem[] contentArray );
+    public void setContentCursor( Cursor contentViewCursor );
     public Context getGalleryViewContext();
 }
 
@@ -80,7 +81,7 @@ public class gallery extends ListActivity implements GalleryView, OnItemClickLis
     }
 
     @Override
-    public void setContentList( GalleryContentItem[] contentArray ) {
+    public void setContentCursor( Cursor contentViewCursor ) {
         // TODO update view with content
     }
 

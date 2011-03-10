@@ -2,26 +2,33 @@ package com.teleca.mm5.gallery;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.Cursor;
+import android.os.Handler;
+import android.os.Handler.Callback;
+import android.os.Message;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
-public class ImageAdapter extends BaseAdapter  {
+public class ImageAdapter extends BaseAdapter implements Callback {
+    private static final String TAG = "ImageAdapter";
     private Context mContext;
     private int mCountDefaultWallpapers;
-    private GalleryContentItem[] mGalleryContentItem;
+    private Cursor contentCursor;
 
-    public ImageAdapter( Context mDataContext, GalleryContentItem[] GalleryContentItem ){
+    public ImageAdapter( Context mDataContext, Cursor contentCursor ){
         mContext = mDataContext;
         mCountDefaultWallpapers = mDefaultWallpapers.length;
-        mGalleryContentItem = GalleryContentItem;
+        this.contentCursor = contentCursor;
     }
 
     @Override
     public int getCount(){
-        return ( mGalleryContentItem.length + getCountDefaultWallpapers() );
+        return ( contentCursor.getCount() + getCountDefaultWallpapers() );
     }
 
     public int getCountDefaultWallpapers(){
@@ -47,11 +54,15 @@ public class ImageAdapter extends BaseAdapter  {
     public String getNameItemId(int position, Resources mRes){
         String mNameFile = null;
 
-        if( position < mCountDefaultWallpapers &&
-                mRes != null){
+        if( position < mCountDefaultWallpapers && mRes != null) {
             mNameFile = mRes.getResourceEntryName(mDefaultWallpapers[position]);
         } else {
-            mNameFile = mGalleryContentItem[position-mCountDefaultWallpapers].getContentName();
+            try {
+                contentCursor.moveToPosition(position - mCountDefaultWallpapers);
+                mNameFile = contentCursor.getString(contentCursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));
+            } catch(Exception e) {
+                Log.e( TAG, "getNameItemId(): " + e.getClass() + " thrown " + e.getMessage());
+            }
         }
 
         return mNameFile;
@@ -73,7 +84,20 @@ public class ImageAdapter extends BaseAdapter  {
         if( position < mCountDefaultWallpapers ){
             imageView.setImageResource(mDefaultWallpapers[position]);
         } else {
-            imageView.setImageBitmap(mGalleryContentItem[position - mCountDefaultWallpapers].getContentBitmap());
+            String fileName = null;
+            ContentImageLoader itemImageLoader = null;
+
+            try {
+                contentCursor.moveToPosition(position - mCountDefaultWallpapers);
+                fileName = contentCursor.getString(contentCursor.getColumnIndex(MediaStore.Images.Media.DATA));
+            } catch(Exception e) {
+                Log.e( TAG, "getView(): " + e.getClass() + " thrown " + e.getMessage());
+            }
+
+            // file name obtained, now provide image loading in separate thread
+            itemImageLoader = new ContentImageLoader(imageView, fileName, parent, new Handler(this));
+
+            itemImageLoader.run();
         }
         return imageView;
     }
@@ -89,5 +113,33 @@ public class ImageAdapter extends BaseAdapter  {
             R.drawable.image4, R.drawable.image4,
             R.drawable.image4, R.drawable.image4
     };
+
+    @Override
+    public boolean handleMessage(Message loaderMsg) {
+        ContentImageLoader itemImageLoader = null;
+
+        if( null != loaderMsg && loaderMsg.obj instanceof ContentImageLoader ) {
+            try {
+                itemImageLoader = (ContentImageLoader) loaderMsg.obj;
+
+                if( null != itemImageLoader ) {
+                    ImageView iv = itemImageLoader.getIv();
+                    View parentView = itemImageLoader.getParent();
+
+                    if(null != iv) {
+                        iv.setImageBitmap(itemImageLoader.getBm());
+                        iv.forceLayout();
+                    }
+
+                    if( null != parentView ) {
+                        parentView.postInvalidate();
+                    }
+                }
+            } catch(Exception e) {
+                Log.e( TAG, "handleMessage(): " + e.getClass() + " thrown " + e.getMessage());
+            }
+        }
+        return true;
+    }
 
 }

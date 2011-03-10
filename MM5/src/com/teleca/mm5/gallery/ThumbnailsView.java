@@ -3,6 +3,7 @@ package com.teleca.mm5.gallery;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -18,7 +19,7 @@ import android.widget.TextView;
 public class ThumbnailsView extends Activity implements GalleryView{
     private ImageAdapter mImageAdapter;
     private GridView gridview;
-    private GalleryContentItem[] contentThumbnailsArray;
+    private Cursor contentCursor;
     private GalleryWorkTask galleryWorkBg = null;
     private static final String TAG = "ThumbnailsView";
 
@@ -125,7 +126,7 @@ public class ThumbnailsView extends Activity implements GalleryView{
     public void finishedWorkExecution(GalleryWorkTaskResult processingResult) {
         // store status of processing
         if( GalleryWorkTaskResult.GALLERY_RESULT_FINISHED == processingResult ) {
-            mImageAdapter = new ImageAdapter(this, contentThumbnailsArray);
+            mImageAdapter = new ImageAdapter(this, contentCursor);
 
             gridview = (GridView) findViewById(R.id.gridView1);
             gridview.setAdapter(mImageAdapter);
@@ -156,9 +157,9 @@ public class ThumbnailsView extends Activity implements GalleryView{
     }
 
     @Override
-    public void setContentList(GalleryContentItem[] contentArray) {
+    public void setContentCursor(Cursor contentViewCursor) {
         // store content list
-        contentThumbnailsArray = contentArray.clone();
+        contentCursor = contentViewCursor;
     }
 
     @Override
