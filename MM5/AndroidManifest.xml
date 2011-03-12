@@ -5,16 +5,21 @@
       android:versionName="1.0">
     <uses-sdk android:minSdkVersion="11" />
 
-    <application android:icon="@drawable/icon" android:label="@string/app_name">
+    <application android:windowAnimationStyle="@android:style/Animation.Translucent">
         <activity android:name=".gallery"
-                  android:label="@string/app_name">
+                  android:label="@string/app_name"
+                  android:activityOpenEnterAnimation="@android:style/Animation.Translucent"
+                  android:activityCloseExitAnimation="@android:style/Animation.Translucent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    <activity android:name="ThumbnailsView">
+    <activity android:name="ThumbnailsView"
+              android:label="@string/thumbnails"
+              android:icon="@drawable/icon_thumbnail"
+              android:activityOpenEnterAnimation="@android:style/Animation.Translucent"
+              android:activityCloseExitAnimation="@android:style/Animation.Translucent">
         </activity>
-
 </application>
 </manifest>

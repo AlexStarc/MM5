@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="hello">Hello World, gallery!</string>
-    <string name="app_name">android_mm5</string>
+    <string name="app_name">Media Content Gallery</string>
+    <string name="thumbnails">Thumbnails</string>
     <string name="content_service">content service to iterate with provider</string>
     <string name="Details">Details</string>
     <string name="ListView">List View</string>

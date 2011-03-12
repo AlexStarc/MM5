@@ -20,8 +20,9 @@ public class ContentImageLoader implements Runnable {
     private View parent;
     private ImageView iv;
     private String contentPath;
-    Handler callerHdlr;
+    private Handler callerHdlr;
     private Bitmap bm;
+    private Integer nItemId;
 
     /**
      * Creates an ImageLoader object with the specified parameters.
@@ -29,11 +30,16 @@ public class ContentImageLoader implements Runnable {
      * @param urlString the url string for the image
      * @param parent the parent view to refresh when the image has loaded
      */
-    public ContentImageLoader(ImageView iv, String contentPath, View parent, Handler callerHdlr) {
+    public ContentImageLoader(ImageView iv,
+                              String contentPath,
+                              View parent,
+                              Integer nItemId,
+                              Handler callerHdlr) {
         this.setParent(parent);
         this.setIv(iv);
         this.contentPath = contentPath;
         this.callerHdlr = callerHdlr;
+        this.setnItemId(nItemId);
         Thread thread = new Thread(this);
         thread.start();
     }
@@ -90,6 +96,20 @@ public class ContentImageLoader implements Runnable {
      */
     public Bitmap getBm() {
         return bm;
+    }
+
+    /**
+     * @param nItemId the nItemId to set
+     */
+    public void setnItemId(Integer nItemId) {
+        this.nItemId = nItemId;
+    }
+
+    /**
+     * @return the nItemId
+     */
+    public Integer getnItemId() {
+        return nItemId;
     }
 
 }

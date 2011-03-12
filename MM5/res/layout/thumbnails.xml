@@ -1,16 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <RelativeLayout android:id="@+id/relativeLayout1" android:layout_width="fill_parent" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
-        <RelativeLayout android:id="@+id/relativeLayout2" android:layout_height="wrap_content" android:layout_alignParentTop="true" android:layout_width="match_parent">
+    <RelativeLayout android:id="@+id/relativeLayout1"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    xmlns:android="http://schemas.android.com/apk/res/android">
+        <RelativeLayout android:id="@+id/relativeLayout2"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_width="match_parent">
             <TextView 
-            	android:layout_alignParentLeft="true" 
-            	android:id="@+id/textView1" 
-            	android:layout_height="wrap_content" 
-            	android:layout_width="wrap_content" 
+            	android:layout_alignParentLeft="true"
+            	android:layout_marginLeft="5dp"
+            	android:id="@+id/thumbnailItemDisplayName"
+            	android:layout_height="wrap_content"
+            	android:layout_width="wrap_content"
             	android:text="0">
             </TextView>
             <TextView 
             	android:layout_alignParentRight="true" 
-            	android:id="@+id/textView2" 
+            	android:layout_marginRight="5dp"
+            	android:id="@+id/thumbnailCounter"
             	android:layout_height="wrap_content" 
             	android:layout_width="wrap_content" 
             	android:text="0/0">
@@ -18,17 +26,19 @@
         </RelativeLayout>
 
         	<GridView 
-        		android:layout_width="wrap_content" 
+        	    android:layout_width="match_parent" 
         		android:id="@+id/gridView1" 
         		android:layout_below="@+id/relativeLayout2" 
         		android:layout_alignLeft="@+id/relativeLayout2" 
-        		android:layout_alignRight="@+id/relativeLayout2" 
-        		android:layout_height="310dip"
+        		android:layout_alignRight="@+id/relativeLayout2"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+        		android:layout_height="wrap_content"
         		android:columnWidth="60dp"
         		android:numColumns="auto_fit"
         		android:verticalSpacing="5dp"
     			android:horizontalSpacing="5dp"
-    			android:stretchMode="columnWidth" 
+    			android:stretchMode="spacingWidthUniform" 
     			android:focusableInTouchMode="true" 
     			android:drawSelectorOnTop="true"
     			android:focusable="true"
