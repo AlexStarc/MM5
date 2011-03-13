@@ -7,4 +7,11 @@
     <string name="Details">Details</string>
     <string name="ListView">List View</string>
     <string name="FullScreen">Full Screen</string>
+    <string-array name="mainmenu_items">
+        <item>"Thumbnails"</item>
+        <item>"List"</item>
+        <item>"FullScreen"</item>
+        <item>"Help"</item>
+    </string-array>
+    
 </resources>

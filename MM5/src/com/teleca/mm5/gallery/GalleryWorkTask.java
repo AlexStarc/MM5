@@ -16,19 +16,16 @@ enum GalleryWorkTaskResult {
     GALLERY_RESULT_ERROR,
 }
 
-enum GalleryWorkTaskContentType {
-    GALLERY_AUDIO,
-    GALLERY_IMAGES
-}
+
 
 @ClassPreamble (
                 author = "Alexander Starchenko",
 
                 description = "applet work task, main purpose - interact with fs and providers"
 )
-class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, GalleryWorkTaskResult> {
+class GalleryWorkTask extends AsyncTask<GalleryContentType, Integer, GalleryWorkTaskResult> {
     private static final String TAG = "GalleryWorkTask";
-    private GalleryView parentGalleryView;
+    private GalleryViewInterface parentGalleryView;
     ContentResolver mainContentResolver;
     Cursor mainContentCursor;
 
@@ -36,13 +33,12 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
     public GalleryWorkTask() {
     }
 
-    public GalleryWorkTask(GalleryView parentGalleryView) {
+    public GalleryWorkTask(GalleryViewInterface parentGalleryView) {
         this.setParentGalleryView(parentGalleryView);
     }
 
-    /** below function contents get executed in a separate thread */
     @Override
-    protected GalleryWorkTaskResult doInBackground(GalleryWorkTaskContentType... type) throws IllegalArgumentException {
+    protected GalleryWorkTaskResult doInBackground(GalleryContentType... type) throws IllegalArgumentException {
         GalleryWorkTaskResult resultProcessing = GalleryWorkTaskResult.GALLERY_RESULT_ERROR;
         String mediaStorageState = Environment.getExternalStorageState();
         Uri uriGalleryContent = null;
@@ -55,7 +51,7 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
                 parentGalleryView.getGalleryViewContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://"+ Environment.getExternalStorageDirectory())));
             }
             catch(Exception e) {
-                Log.e( TAG, "EXCEPTION: " + e.getClass() + " thrown " + e.getMessage());
+                Log.e( TAG, "doInBackground(): " + e.getClass() + " thrown " + e.getMessage());
             }
 
             switch(type[0]) {
@@ -68,7 +64,7 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
                 break;
 
             default:
-                Log.i( TAG, "EXCEPTION: incorrect parameter encounted" );
+                Log.i( TAG, "doInBackground(): incorrect parameter encounted" );
                 throw new IllegalArgumentException("incorrect GalleryWorkTaskContentType passed by view");
             }
 
@@ -96,7 +92,7 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
                     }
                 }
                 catch(Exception e) {
-                    Log.e( TAG, "EXCEPTION: " + e.getClass() + " thrown " + e.getMessage());
+                    Log.e( TAG, "doInBackground(): " + e.getClass() + " thrown " + e.getMessage());
                 }
             }
         }
@@ -123,7 +119,7 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
     /**
      * @param parentGalleryView the parentGalleryView to set
      */
-    protected final void setParentGalleryView(GalleryView parentGalleryView) {
+    protected final void setParentGalleryView(GalleryViewInterface parentGalleryView) {
         this.parentGalleryView = parentGalleryView;
 
         // get content provider here also
@@ -135,7 +131,7 @@ class GalleryWorkTask extends AsyncTask<GalleryWorkTaskContentType, Integer, Gal
     /**
      * @return the parentGalleryView
      */
-    protected final GalleryView getParentGalleryView() {
+    protected final GalleryViewInterface getParentGalleryView() {
         return parentGalleryView;
     }
 

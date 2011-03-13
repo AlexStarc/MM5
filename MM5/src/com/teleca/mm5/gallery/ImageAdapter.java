@@ -120,12 +120,12 @@ public class ImageAdapter extends BaseAdapter implements Callback {
     }
 
     private Integer[] mDefaultWallpapers = { R.drawable.image1,
-            R.drawable.image2, R.drawable.image4, R.drawable.image4,
-            R.drawable.image4, R.drawable.image4, R.drawable.image2,
-            R.drawable.image1, R.drawable.image4, R.drawable.image4,
-            R.drawable.image4, R.drawable.image4, R.drawable.image2,
-            R.drawable.image1, R.drawable.image4, R.drawable.image4,
-            R.drawable.image4, R.drawable.image4 };
+                                             R.drawable.image2, R.drawable.image4, R.drawable.image4,
+                                             R.drawable.image4, R.drawable.image4, R.drawable.image2,
+                                             R.drawable.image1, R.drawable.image4, R.drawable.image4,
+                                             R.drawable.image4, R.drawable.image4, R.drawable.image2,
+                                             R.drawable.image1, R.drawable.image4, R.drawable.image4,
+                                             R.drawable.image4, R.drawable.image4 };
 
     @Override
     public boolean handleMessage(Message loaderMsg) {
@@ -161,5 +161,4 @@ public class ImageAdapter extends BaseAdapter implements Callback {
         }
         return true;
     }
-
 }

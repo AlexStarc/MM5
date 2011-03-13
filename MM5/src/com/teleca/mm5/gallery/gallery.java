@@ -2,10 +2,8 @@ package com.teleca.mm5.gallery;
 
 import java.lang.annotation.Documented;
 
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -23,48 +21,35 @@ import android.widget.Toast;
     String description();
 }
 
-// enum for available gallery views to be used in methods
-enum GalleryViewTypes {
-    GALLERY_LIST,
-    GALLERY_THUMBNAILS,
-    GALLERY_FULLSCREEN,
-    GALLERY_DETAILS
-}
+
 
 @ClassPreamble (
                 author = "Alexander Starchenko",
-                description = "interface for view for interaction with GalleryWorkTask task"
+                description = "main menu view"
 )
-interface GalleryView {
-    public void progressWorkExecution( int NumberFiles );
-    public void finishedWorkExecution( GalleryWorkTaskResult processingResult );
-    public void setContentCursor( Cursor contentViewCursor );
-    public Context getGalleryViewContext();
-}
-
-@ClassPreamble (
-                author = "Alexander Starchenko",
-                description = "main applet class"
-)
-public class gallery extends ListActivity implements GalleryView, OnItemClickListener {
+public class gallery extends GalleryView<ListView> implements OnItemClickListener {
     private static final String TAG = "gallery";
-    /* Array which contains items which used in main menu */
-    static final String[] GALLERY_MAIN_MENU = new String[] {
-        "Thumbnails", "List", "FullScreen", "Help"
-    };
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.i( TAG, "Started" );
+
+        setContentType(GalleryViewType.GALLERY_MAINMENU);
         super.onCreate(savedInstanceState);
 
-        setListAdapter(new ArrayAdapter<String>(this, R.layout.mainmenu_item, GALLERY_MAIN_MENU));
+        try {
+            getMainView().setAdapter(new ArrayAdapter<String>(this, R.layout.mainmenu_item, getResources().getStringArray(R.array.mainmenu_items) ));
+        } catch(Exception e) {
+            Log.e( TAG, "onCreate(): " + e.getClass() + " thrown " + e.getMessage());
+        }
 
-        ListView lv = getListView();
-        lv.setTextFilterEnabled(true);
+        ListView lv = getMainView();
 
-        lv.setOnItemClickListener(this);
+        if( null != lv ) {
+            lv.setTextFilterEnabled(true);
+            lv.setOnItemClickListener(this);
+        }
     }
 
     @Override
@@ -78,11 +63,6 @@ public class gallery extends ListActivity implements GalleryView, OnItemClickLis
          *  Contents of view might needs to be updated only after status received via finishedWorkExecution */
         // TODO: provide list updating
         Log.i( TAG, "BG work has finished with " + processingResult );
-    }
-
-    @Override
-    public void setContentCursor( Cursor contentViewCursor ) {
-        // TODO update view with content
     }
 
     @Override
