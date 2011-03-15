@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
@@ -27,6 +28,10 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
 
         setContentType(GalleryViewType.GALLERY_THUMBNAILS);
         super.onCreate(savedInstanceState);
+
+        mImageAdapter = new ImageAdapter(this, getContentCursor());
+
+        getMainView().setAdapter(mImageAdapter);
 
         Button mViewButton = (Button)findViewById(R.id.button1);
         mViewButton.setOnClickListener(new View.OnClickListener() {
@@ -61,9 +66,10 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
         mTextView.setText( " " );
     }
 
-    private void update(int mSelectItemId){
-        TextView mTextView;
-        ImageView mResizeImage;
+    private void update(int mSelectItemId, View selectedView){
+        TextView mTextView = null;
+        ImageView mResizeImage = null;
+        ImageView imageView = null;
         Resources mRes = getResources();
 
         mTextView = (TextView)findViewById(R.id.thumbnailItemDisplayName);
@@ -72,25 +78,29 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
         mTextView = (TextView)findViewById(R.id.thumbnailCounter);
         mTextView.setText(String.format("%d/%d", mSelectItemId + 1, mImageAdapter.getCount()));
 
-        ImageView imageView = (ImageView)getMainView().getChildAt(mSelectItemId);
+        if( null != selectedView && selectedView instanceof ImageView)
+        {
+            imageView = (ImageView)selectedView;
+        }
 
-        int[] locationImageView = new int[2];
-        int[] locationGridView = new int[2];
+        if( null != imageView ) {
+            int[] locationImageView = new int[2];
+            int[] locationGridView = new int[2];
 
-        imageView.getLocationOnScreen(locationImageView);
-        getMainView().getLocationOnScreen(locationGridView);
+            imageView.getLocationOnScreen(locationImageView);
+            getMainView().getLocationOnScreen(locationGridView);
 
-        mResizeImage = (ImageView) mImageAdapter.getView(mSelectItemId,
-                                                         findViewById(R.id.imageView1),
-                                                         null);
+            mResizeImage = (ImageView) mImageAdapter.getView(mSelectItemId,
+                                                             findViewById(R.id.imageView1),
+                                                             null);
+            mResizeImage.setX(locationImageView[0] - 40);
+            mResizeImage.setY(locationImageView[1] - 20 - locationGridView[1]);
 
-        mResizeImage.setX(locationImageView[0] - 40);
-        mResizeImage.setY(locationImageView[1] - 20 - locationGridView[1]);
-
-        selectionUpdateAnimator.cancel();
-        // store currently animated view
-        curSelectionImageView = mResizeImage;
-        selectionUpdateAnimator.start();
+            selectionUpdateAnimator.cancel();
+            // store currently animated view
+            curSelectionImageView = mResizeImage;
+            selectionUpdateAnimator.start();
+        }
     }
 
     @Override
@@ -127,15 +137,14 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
     public void finishedWorkExecution(GalleryWorkTaskResult processingResult) {
         // store status of processing
         if( GalleryWorkTaskResult.GALLERY_RESULT_FINISHED == processingResult ) {
-            mImageAdapter = new ImageAdapter(this, getContentCursor());
 
-            getMainView().setAdapter(mImageAdapter);
+            mImageAdapter.setContentCursor(getContentCursor());
 
             getMainView().setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> arg0, View view,
                                            int mSelectItemId, long arg3) {
-                    update(mSelectItemId);
+                    update(mSelectItemId, view);
                 }
 
                 @Override
@@ -147,10 +156,29 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
             getMainView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
                 @Override
-                public void onItemClick(AdapterView<?> arg0, View arg1,
+                public void onItemClick(AdapterView<?> arg0, View view,
                                         int mSelectItemId, long arg3) {
-                    update(mSelectItemId);
-                    getMainView().setSelection(mSelectItemId);
+                    //getMainView().setSelection(mSelectItemId);
+                    update(mSelectItemId, view);
+                }
+            });
+
+            getMainView().setOnScrollListener(new AbsListView.OnScrollListener() {
+
+                @Override
+                public void onScrollStateChanged(AbsListView view, int scrollState) {
+                    // no need to handle scroll state change
+                    ImageView mResizeImage = (ImageView)findViewById(R.id.imageView1);
+
+                    if( null != mResizeImage )
+                    {
+                        mResizeImage.setImageBitmap(null);
+                    }
+                }
+
+                @Override
+                public void onScroll(AbsListView view, int firstVisibleItem,
+                                     int visibleItemCount, int totalItemCount) {
                 }
             });
         }

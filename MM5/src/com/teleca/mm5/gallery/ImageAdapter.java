@@ -3,6 +3,8 @@ package com.teleca.mm5.gallery;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Handler.Callback;
 import android.os.Message;
@@ -16,28 +18,27 @@ import android.widget.ImageView;
 
 public class ImageAdapter extends BaseAdapter implements Callback {
     private static final String  TAG = "ImageAdapter";
+    private static final Integer ZOOM_THUMBNAIL_WIDTH = 150;
+    private static final Integer ZOOM_THUMBNAIL_HEIGHT = 150;
     private Context              mContext;
-    private int                  mCountDefaultWallpapers;
     private Cursor               contentCursor;
     private GalleryContentItem[] mContentItemsArray;
+    private Bitmap mPlaceHolder = null;
 
     public ImageAdapter(Context mDataContext, Cursor contentCursor) {
         mContext = mDataContext;
-        mCountDefaultWallpapers = mDefaultWallpapers.length;
         this.contentCursor = contentCursor;
 
         if (null != contentCursor) {
             mContentItemsArray = new GalleryContentItem[contentCursor.getCount()];
         }
+
+        mPlaceHolder = BitmapFactory.decodeResource(mDataContext.getResources(), R.drawable.tumbnail_holder);
     }
 
     @Override
     public int getCount() {
-        return (contentCursor.getCount() + getCountDefaultWallpapers());
-    }
-
-    public int getCountDefaultWallpapers() {
-        return mCountDefaultWallpapers;
+        return (null != contentCursor ? contentCursor.getCount() : 0);
     }
 
     @Override
@@ -48,27 +49,19 @@ public class ImageAdapter extends BaseAdapter implements Callback {
 
     @Override
     public long getItemId(int position) {
-        if (position < mCountDefaultWallpapers) {
-            return mDefaultWallpapers[position];
-        } else {
-            return 0;
-        }
+        return 0;
     }
 
     public String getNameItemId(int position, Resources mRes) {
         String mNameFile = null;
 
-        if (position < mCountDefaultWallpapers && mRes != null) {
-            mNameFile = mRes.getResourceEntryName(mDefaultWallpapers[position]);
-        } else {
-            try {
-                contentCursor.moveToPosition(position - mCountDefaultWallpapers);
-                mNameFile = contentCursor.getString(contentCursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));
-            } catch (Exception e) {
-                Log.e(TAG,
-                      "getNameItemId(): " + e.getClass() + " thrown "
-                      + e.getMessage());
-            }
+        try {
+            contentCursor.moveToPosition(position);
+            mNameFile = contentCursor.getString(contentCursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));
+        } catch (Exception e) {
+            Log.e(TAG,
+                  "getNameItemId(): " + e.getClass() + " thrown "
+                  + e.getMessage());
         }
 
         return mNameFile;
@@ -76,56 +69,43 @@ public class ImageAdapter extends BaseAdapter implements Callback {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView;
+        ImageView imageView = null;
 
         if (convertView == null) {
             imageView = new ImageView(mContext);
             imageView.setLayoutParams(new GridView.LayoutParams(60, 60));
+            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         } else {
             imageView = (ImageView) convertView;
         }
 
-        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-
-        if (position < mCountDefaultWallpapers) {
-            imageView.setImageResource(mDefaultWallpapers[position]);
-        } else {
-            if (null != mContentItemsArray[position - mCountDefaultWallpapers]) {
-                imageView.setImageBitmap(mContentItemsArray[position - mCountDefaultWallpapers].getContentBitmap());
-            } else {
-                String fileName = null;
-                ContentImageLoader itemImageLoader = null;
-
-                try {
-                    contentCursor.moveToPosition(position - mCountDefaultWallpapers);
-                    fileName = contentCursor.getString(contentCursor.getColumnIndex(MediaStore.Images.Media.DATA));
-                } catch (Exception e) {
-                    Log.e(TAG,
-                          "getView(): " + e.getClass() + " thrown " + e.getMessage());
-                }
-
-                mContentItemsArray[position - mCountDefaultWallpapers] = new GalleryContentItem(null,
-                                                                                                fileName);
-                // file name obtained, now provide image loading in separate thread
-                itemImageLoader = new ContentImageLoader(imageView,
-                                                         fileName,
-                                                         parent,
-                                                         position - mCountDefaultWallpapers,
-                                                         new Handler(this));
-
-                itemImageLoader.run();
+        if (null != mContentItemsArray[position]) {
+            if( null != mContentItemsArray[position].getContentBitmap() )
+            {
+                imageView.setImageBitmap(mContentItemsArray[position].getContentBitmap());
             }
+        } else {
+            @SuppressWarnings("unused")
+            ContentImageLoader itemImageLoader = null;
+
+            // set thumbnail placeholder in place of loading image
+            if( null != mPlaceHolder)
+            {
+                imageView.setImageBitmap(mPlaceHolder);
+            }
+
+            mContentItemsArray[position] = new GalleryContentItem(null,
+                                                                  null);
+            // file name obtained, now provide image loading in separate thread
+            itemImageLoader = new ContentImageLoader(contentCursor,
+                                                     position,
+                                                     new Handler(this),
+                                                     ZOOM_THUMBNAIL_WIDTH,
+                                                     ZOOM_THUMBNAIL_HEIGHT);
         }
+
         return imageView;
     }
-
-    private Integer[] mDefaultWallpapers = { R.drawable.image1,
-                                             R.drawable.image2, R.drawable.image4, R.drawable.image4,
-                                             R.drawable.image4, R.drawable.image4, R.drawable.image2,
-                                             R.drawable.image1, R.drawable.image4, R.drawable.image4,
-                                             R.drawable.image4, R.drawable.image4, R.drawable.image2,
-                                             R.drawable.image1, R.drawable.image4, R.drawable.image4,
-                                             R.drawable.image4, R.drawable.image4 };
 
     @Override
     public boolean handleMessage(Message loaderMsg) {
@@ -136,29 +116,37 @@ public class ImageAdapter extends BaseAdapter implements Callback {
                 itemImageLoader = (ContentImageLoader) loaderMsg.obj;
 
                 if (null != itemImageLoader) {
-                    ImageView iv = itemImageLoader.getIv();
-                    View parentView = itemImageLoader.getParent();
                     Integer nItemId = itemImageLoader.getnItemId();
 
                     if (null != mContentItemsArray && 0 <= nItemId
                             && null != mContentItemsArray[nItemId]) {
                         mContentItemsArray[nItemId].setContentBitmap(itemImageLoader.getBm());
-
-                        if (null != iv) {
-                            iv.setImageBitmap(mContentItemsArray[nItemId].getContentBitmap());
-
-                            if (null != parentView) {
-                                parentView.postInvalidate();
-                            }
-                        }
                     }
                 }
+
+                this.notifyDataSetChanged();
             } catch (Exception e) {
                 Log.e(TAG,
                       "handleMessage(): " + e.getClass() + " thrown "
                       + e.getMessage());
             }
         }
+
         return true;
     }
+
+    public Cursor getContentCursor() {
+        return contentCursor;
+    }
+
+    public void setContentCursor(Cursor contentCursor) {
+        this.contentCursor = contentCursor;
+
+        if (null != contentCursor) {
+            mContentItemsArray = new GalleryContentItem[contentCursor.getCount()];
+        }
+
+        this.notifyDataSetChanged();
+    }
 }
+
