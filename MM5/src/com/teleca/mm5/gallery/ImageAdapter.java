@@ -1,5 +1,9 @@
 package com.teleca.mm5.gallery;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -25,10 +29,13 @@ public class ImageAdapter extends BaseAdapter implements Callback {
     public  static final Integer ZOOM_THUMBNAIL_WIDTH_DPI = 180;
     public  static final Integer ZOOM_THUMBNAIL_HEIGHT_DPI = 180;
     public  static final Integer SCALE_FACTOR = 2;
+    private static final Integer SIMULATEOS_DECODING_THREADS_COUNT = 3;
     private Context              mContext;
     private Cursor               contentCursor;
     private GalleryContentItem[] mContentItemsArray;
     private Bitmap mPlaceHolder = null;
+    private ThreadPoolExecutor mDecodingThreadPool = null;
+    private final ArrayBlockingQueue<Runnable> mDecodingQueue = new ArrayBlockingQueue<Runnable>(SIMULATEOS_DECODING_THREADS_COUNT * 50);
 
     public ImageAdapter(Context mDataContext, Cursor contentCursor) {
         mContext = mDataContext;
@@ -48,6 +55,12 @@ public class ImageAdapter extends BaseAdapter implements Callback {
             ImageAdapter.zoomThumbnailWidth = ((Float)(ImageAdapter.ZOOM_THUMBNAIL_WIDTH_DPI * metrics.density)).intValue();
             ImageAdapter.zoomThumbnailHeight = ((Float)(ImageAdapter.ZOOM_THUMBNAIL_HEIGHT_DPI * metrics.density)).intValue();
         }
+
+        mDecodingThreadPool = new ThreadPoolExecutor( ImageAdapter.SIMULATEOS_DECODING_THREADS_COUNT,
+                                                      ImageAdapter.SIMULATEOS_DECODING_THREADS_COUNT,
+                                                      Long.MAX_VALUE,
+                                                      TimeUnit.NANOSECONDS,
+                                                      mDecodingQueue);
     }
 
     @Override
@@ -89,7 +102,7 @@ public class ImageAdapter extends BaseAdapter implements Callback {
             imageView = new ImageView(mContext);
             imageView.setLayoutParams(new GridView.LayoutParams(ImageAdapter.zoomThumbnailWidth / SCALE_FACTOR,
                                                                 ImageAdapter.zoomThumbnailHeight / SCALE_FACTOR));
-            imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         } else {
             imageView = (ImageView) convertView;
         }
@@ -100,9 +113,6 @@ public class ImageAdapter extends BaseAdapter implements Callback {
                 imageView.setImageBitmap(mContentItemsArray[position].getContentBitmap());
             }
         } else {
-            @SuppressWarnings("unused")
-            ContentImageLoader itemImageLoader = null;
-
             // set thumbnail placeholder in place of loading image
             if( null != mPlaceHolder)
             {
@@ -112,11 +122,11 @@ public class ImageAdapter extends BaseAdapter implements Callback {
             mContentItemsArray[position] = new GalleryContentItem(null,
                                                                   null);
             // file name obtained, now provide image loading in separate thread
-            itemImageLoader = new ContentImageLoader(contentCursor,
-                                                     position,
-                                                     new Handler(this),
-                                                     ImageAdapter.zoomThumbnailWidth,
-                                                     ImageAdapter.zoomThumbnailHeight);
+            mDecodingThreadPool.execute( new ContentImageLoader(contentCursor,
+                                                                position,
+                                                                new Handler(this),
+                                                                ImageAdapter.zoomThumbnailWidth,
+                                                                ImageAdapter.zoomThumbnailHeight) );
         }
 
         return imageView;

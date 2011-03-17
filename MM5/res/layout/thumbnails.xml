@@ -31,16 +31,17 @@
         		android:layout_below="@+id/relativeLayout2" 
         		android:layout_above="@+id/relativeLayout3"
         		android:layout_alignLeft="@+id/relativeLayout2" 
-        		android:layout_alignRight="@+id/relativeLayout2"
+        		android:layout_alignParentLeft="true"
+        		android:layout_alignParentRight="true"
                 android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
+                android:layout_marginRight="30dp"
                 android:layout_marginBottom="5dp"
         		android:layout_height="wrap_content"
         		android:columnWidth="90dp"
         		android:numColumns="auto_fit"
         		android:verticalSpacing="5dp"
     			android:horizontalSpacing="5dp"
-    			android:stretchMode="spacingWidth" 
+    			android:stretchMode="spacingWidthUniform" 
     			android:focusableInTouchMode="true" 
     			android:drawSelectorOnTop="false"
     			android:focusable="true">
@@ -49,8 +50,8 @@
         		android:layout_width="180dp"
         		android:id="@+id/imageView1"
         		android:layout_height="180dp"
-                android:layout_below="@+id/relativeLayout2" 
-                android:layout_alignLeft="@+id/relativeLayout2">
+                android:layout_alignParentTop="true" 
+                android:layout_alignParentLeft="true">
         	</ImageView>
         <RelativeLayout 
         	android:id="@+id/relativeLayout3" 

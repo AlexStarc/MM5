@@ -83,9 +83,6 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
         }
 
         if( null != imageView ) {
-            int[] locationImageView = new int[2];
-
-            imageView.getLocationOnScreen(locationImageView);
 
             mResizeImage = (ImageView) mImageAdapter.getView(mSelectItemId,
                                                              findViewById(R.id.imageView1),
@@ -93,8 +90,8 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
             ViewGroup.LayoutParams zoomedImageLayoutParams = mResizeImage.getLayoutParams();
 
             if( zoomedImageLayoutParams instanceof ViewGroup.MarginLayoutParams ) {
-                Integer thumbnailX = locationImageView[0] - ( ImageAdapter.getZoomThumbnailWidth() - imageView.getWidth() ) / 2;
-                Integer thumbnailY = imageView.getTop() - ( ImageAdapter.getZoomThumbnailHeight() - imageView.getHeight() ) / 2;
+                Integer thumbnailX = getMainView().getLeft() + imageView.getLeft() - ( ImageAdapter.getZoomThumbnailWidth() - imageView.getWidth() ) / 2;
+                Integer thumbnailY = getMainView().getTop() + imageView.getTop() - ( ImageAdapter.getZoomThumbnailHeight() - imageView.getHeight() ) / 2;
 
                 ((ViewGroup.MarginLayoutParams)zoomedImageLayoutParams).setMargins(thumbnailX,
                                                                                    thumbnailY,

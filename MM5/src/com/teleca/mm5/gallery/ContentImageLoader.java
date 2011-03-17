@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.teleca.mm5.gallery;
 
@@ -44,8 +44,6 @@ public class ContentImageLoader implements Runnable {
         this.nRequiredWidth = nRequiredWidth;
         this.nRequiredHeight = nRequiredHeight;
         this.setnItemId(nItemId);
-        Thread thread = new Thread(this);
-        thread.start();
     }
 
     @Override
