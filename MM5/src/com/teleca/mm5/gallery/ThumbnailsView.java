@@ -1,7 +1,5 @@
 package com.teleca.mm5.gallery;
 
-import android.animation.PropertyValuesHolder;
-import android.animation.ValueAnimator;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,6 +7,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -16,11 +17,10 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ThumbnailsView extends GalleryView<GridView> implements GalleryViewInterface, ValueAnimator.AnimatorUpdateListener {
+public class ThumbnailsView extends GalleryView<GridView> implements GalleryViewInterface/*, ValueAnimator.AnimatorUpdateListener*/ {
     private ImageAdapter mImageAdapter;
-    private ImageView curSelectionImageView;
     private static final String TAG = "ThumbnailsView";
-    private ValueAnimator       selectionUpdateAnimator;
+    private Animation mSelectionAnimation = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -31,39 +31,38 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
 
         mImageAdapter = new ImageAdapter(this, getContentCursor());
 
-        getMainView().setAdapter(mImageAdapter);
+        try {
+            getMainView().setAdapter(mImageAdapter);
+            getMainView().setSelector(R.drawable.thumbnail_selector);
+            Button mViewButton = (Button)findViewById(R.id.button1);
+            mViewButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
-        Button mViewButton = (Button)findViewById(R.id.button1);
-        mViewButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                /*!! Intent intent = new Intent(this, ThumbnailsView.class);
+                    /*!! Intent intent = new Intent(this, ThumbnailsView.class);
                 startActivity(intent);!!*/
-            }
-        });
+                }
+            });
 
-        Button mOptionsButton = (Button)findViewById(R.id.button2);
-        mOptionsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openOptionsMenu();
-            }
-        });
+            Button mOptionsButton = (Button)findViewById(R.id.button2);
+            mOptionsButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    openOptionsMenu();
+                }
+            });
 
-        // Setup animation for displaying of selected thumbnail
-        selectionUpdateAnimator = ValueAnimator.ofPropertyValuesHolder(PropertyValuesHolder.ofFloat("scaleX", 0.6f, 1),
-                                                                       PropertyValuesHolder.ofFloat("scaleY", 0.6f, 1));
-        selectionUpdateAnimator.setDuration(500);
-        selectionUpdateAnimator.setInterpolator(new android.view.animation.DecelerateInterpolator());
-        selectionUpdateAnimator.addUpdateListener(this);
+            mSelectionAnimation = AnimationUtils.loadAnimation(this, R.anim.thumbnail_selection);
 
-        // set empty tests for text view - name and counter
-        mTextView = (TextView)findViewById(R.id.thumbnailItemDisplayName);
-        mTextView.setText( " " );
+            // set empty tests for text view - name and counter
+            mTextView = (TextView)findViewById(R.id.thumbnailItemDisplayName);
+            mTextView.setText( " " );
 
-        mTextView = (TextView)findViewById(R.id.thumbnailCounter);
-        mTextView.setText( " " );
+            mTextView = (TextView)findViewById(R.id.thumbnailCounter);
+            mTextView.setText( " " );
+        } catch (Exception e) {
+            Log.e(TAG, "onCreate(): " + e.getClass() + " thrown " + e.getMessage());
+        }
     }
 
     private void update(int mSelectItemId, View selectedView){
@@ -85,21 +84,31 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
 
         if( null != imageView ) {
             int[] locationImageView = new int[2];
-            int[] locationGridView = new int[2];
 
             imageView.getLocationOnScreen(locationImageView);
-            getMainView().getLocationOnScreen(locationGridView);
 
             mResizeImage = (ImageView) mImageAdapter.getView(mSelectItemId,
                                                              findViewById(R.id.imageView1),
                                                              null);
-            mResizeImage.setX(locationImageView[0] - 40);
-            mResizeImage.setY(locationImageView[1] - 20 - locationGridView[1]);
+            ViewGroup.LayoutParams zoomedImageLayoutParams = mResizeImage.getLayoutParams();
 
-            selectionUpdateAnimator.cancel();
-            // store currently animated view
-            curSelectionImageView = mResizeImage;
-            selectionUpdateAnimator.start();
+            if( zoomedImageLayoutParams instanceof ViewGroup.MarginLayoutParams ) {
+                Integer thumbnailX = locationImageView[0] - ( ImageAdapter.getZoomThumbnailWidth() - imageView.getWidth() ) / 2;
+                Integer thumbnailY = imageView.getTop() - ( ImageAdapter.getZoomThumbnailHeight() - imageView.getHeight() ) / 2;
+
+                ((ViewGroup.MarginLayoutParams)zoomedImageLayoutParams).setMargins(thumbnailX,
+                                                                                   thumbnailY,
+                                                                                   0,
+                                                                                   0);
+                zoomedImageLayoutParams.height = ImageAdapter.getZoomThumbnailWidth();
+                zoomedImageLayoutParams.width = ImageAdapter.getZoomThumbnailHeight();
+                mResizeImage.setLayoutParams(zoomedImageLayoutParams);
+            }
+
+            if(null != mSelectionAnimation) {
+                mSelectionAnimation.cancel();
+                mResizeImage.startAnimation(mSelectionAnimation);
+            }
         }
     }
 
@@ -158,7 +167,6 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
                 @Override
                 public void onItemClick(AdapterView<?> arg0, View view,
                                         int mSelectItemId, long arg3) {
-                    //getMainView().setSelection(mSelectItemId);
                     update(mSelectItemId, view);
                 }
             });
@@ -181,27 +189,6 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
                                      int visibleItemCount, int totalItemCount) {
                 }
             });
-        }
-    }
-
-    @Override
-    public void onAnimationUpdate( ValueAnimator animation ) {
-        PropertyValuesHolder[] propertyValues = null;
-
-        try {
-            if (null != curSelectionImageView) {
-                propertyValues = animation.getValues();
-
-                if( 2 == propertyValues.length )
-                {
-                    curSelectionImageView.setScaleX((Float)animation.getAnimatedValue( propertyValues[0].getPropertyName() ));
-                    curSelectionImageView.setScaleY((Float)animation.getAnimatedValue( propertyValues[1].getPropertyName() ));
-                }
-            }
-        } catch (Exception e) {
-            Log.e(TAG,
-                  "onAnimationUpdate(): " + e.getClass() + " thrown "
-                  + e.getMessage());
         }
     }
 }
