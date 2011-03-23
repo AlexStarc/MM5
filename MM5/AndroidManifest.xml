@@ -15,11 +15,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    <activity android:name="ThumbnailsView"
-              android:label="@string/thumbnails"
-              android:icon="@drawable/icon_thumbnail"
-              android:activityOpenEnterAnimation="@android:style/Animation.Translucent"
-              android:activityCloseExitAnimation="@android:style/Animation.Translucent">
+        <activity android:name="ThumbnailsView"
+                  android:label="@string/thumbnails"
+                  android:icon="@drawable/icon_thumbnail"
+                  android:activityOpenEnterAnimation="@android:style/Animation.Translucent"
+                  android:activityCloseExitAnimation="@android:style/Animation.Translucent">
+        </activity>
+        <activity android:name="FullScreenView"
+                  android:label="@string/fullscreen"
+                  android:icon="@drawable/icon_thumbnail"
+                  android:activityOpenEnterAnimation="@android:style/Animation.Translucent"
+                  android:activityCloseExitAnimation="@android:style/Animation.Translucent">
         </activity>
 </application>
 </manifest>

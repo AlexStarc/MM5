@@ -1,5 +1,6 @@
 package com.teleca.mm5.gallery;
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,10 +18,11 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ThumbnailsView extends GalleryView<GridView> implements GalleryViewInterface/*, ValueAnimator.AnimatorUpdateListener*/ {
+public class ThumbnailsView extends GalleryView<GridView> implements GalleryViewInterface {
     private ImageAdapter mImageAdapter;
     private static final String TAG = "ThumbnailsView";
     private Animation mSelectionAnimation = null;
+    private Integer nFocusIndex = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,9 +40,8 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
             mViewButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
-                    /*!! Intent intent = new Intent(this, ThumbnailsView.class);
-                startActivity(intent);!!*/
+                  Intent launchFullScreen = new Intent(getGalleryViewContext(), FullScreenView.class);
+                  startActivity( launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", nFocusIndex) );
                 }
             });
 
@@ -164,6 +165,7 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
                 @Override
                 public void onItemClick(AdapterView<?> arg0, View view,
                                         int mSelectItemId, long arg3) {
+                    nFocusIndex = mSelectItemId;
                     update(mSelectItemId, view);
                 }
             });

@@ -27,7 +27,7 @@ enum GalleryViewType {
     GALLERY_MAINMENU    ( R.layout.main, R.id.main_menu, GalleryContentType.GALLERY_STATIC ),
     GALLERY_LIST        ( 0 , 0, GalleryContentType.GALLERY_AUDIO ),
     GALLERY_THUMBNAILS  ( R.layout.thumbnails, R.id.gridView1, GalleryContentType.GALLERY_IMAGES ),
-    GALLERY_FULLSCREEN  ( 0, 0, GalleryContentType.GALLERY_IMAGES ),
+    GALLERY_FULLSCREEN  ( R.layout.fullscreen, R.id.fullscrImageView, GalleryContentType.GALLERY_IMAGES ),
     GALLERY_DETAILS     ( 0, 0, GalleryContentType.GALLERY_ALLTYPES );
 
     private final Integer layoutId;

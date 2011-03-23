@@ -74,37 +74,34 @@ public class ContentImageLoader implements Runnable {
                 }
             }
 
-            if( null != srcBitmap )
-            {
+            if( null != srcBitmap ) {
                 srcWidth = srcBitmap.getWidth();
                 srcHeight = srcBitmap.getHeight();
 
-                // here we need to compute out width and height properly
-                if( srcWidth > this.nRequiredWidth || srcHeight > this.nRequiredHeight )
-                {
+                /* here we need to compute out width and height properly.
+                 * Treat <= values as invalid and don't resize to it.
+                 */
+                if( ( this.nRequiredWidth > 0 && this.nRequiredHeight > 0 ) &&
+                    ( srcWidth > this.nRequiredWidth || srcHeight > this.nRequiredHeight ) ) {
                     // calculate out image dimensions keep aspect ratio
                     Double ratio = (double)srcHeight / (double)srcWidth;
 
-                    if( this.nRequiredWidth <= srcWidth )
-                    {
+                    if( this.nRequiredWidth <= srcWidth ) {
                         srcWidth = this.nRequiredWidth;
                         srcHeight = (int)(srcWidth * ratio);
                     }
 
-                    if( this.nRequiredHeight <= srcHeight )
-                    {
+                    if( this.nRequiredHeight <= srcHeight ) {
                         srcHeight = this.nRequiredHeight;
                         srcWidth = (int)( srcHeight / ratio );
                     }
 
                     // verify if some of image dimensions become 0
-                    if( srcWidth <= 0 )
-                    {
+                    if( srcWidth <= 0 ) {
                         srcWidth = 1;
                     }
 
-                    if( srcHeight <= 0 )
-                    {
+                    if( srcHeight <= 0 ) {
                         srcHeight = 1;
                     }
 
