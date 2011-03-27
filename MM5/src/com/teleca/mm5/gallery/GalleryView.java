@@ -201,7 +201,6 @@ public abstract class GalleryView<V extends View> extends Activity implements Ca
         // TODO Auto-generated method stub
     }
 
-    @Override
     public void finishedWorkExecution( GalleryWorkTaskResult processingResult ) {
         // TODO Auto-generated method stub
     }
