@@ -19,13 +19,19 @@ enum GalleryContentType {
     GALLERY_ALLTYPES
 }
 
+//enum for results of work task proccessing
+enum GalleryWorkTaskResult {
+    GALLERY_RESULT_EMPTY,
+    GALLERY_RESULT_FINISHED,
+    GALLERY_RESULT_ERROR,
+}
 
 
 /** enum for available gallery views to be used in
    methods and data which these views provides */
 enum GalleryViewType {
     GALLERY_MAINMENU    ( R.layout.main, R.id.main_menu, GalleryContentType.GALLERY_STATIC ),
-    GALLERY_LIST        ( 0 , 0, GalleryContentType.GALLERY_AUDIO ),
+    GALLERY_LIST        ( R.layout.listviewgallery, R.id.listview_gallery, GalleryContentType.GALLERY_AUDIO ),
     GALLERY_THUMBNAILS  ( R.layout.thumbnails, R.id.gridView1, GalleryContentType.GALLERY_IMAGES ),
     GALLERY_FULLSCREEN  ( R.layout.fullscreen, R.id.fullscrImageView, GalleryContentType.GALLERY_IMAGES ),
     GALLERY_DETAILS     ( 0, 0, GalleryContentType.GALLERY_ALLTYPES );
@@ -201,6 +207,7 @@ public abstract class GalleryView<V extends View> extends Activity implements Ca
         // TODO Auto-generated method stub
     }
 
+    @Override
     public void finishedWorkExecution( GalleryWorkTaskResult processingResult ) {
         // TODO Auto-generated method stub
     }

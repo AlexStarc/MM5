@@ -27,5 +27,10 @@
                   android:activityOpenEnterAnimation="@android:style/Animation.Translucent"
                   android:activityCloseExitAnimation="@android:style/Animation.Translucent">
         </activity>
+        <activity android:name="ListViewGallery"
+                  android:label="@string/ListView"
+                  android:activityOpenEnterAnimation="@android:style/Animation.Translucent"
+                  android:activityCloseExitAnimation="@android:style/Animation.Translucent">
+        </activity>
 </application>
 </manifest>

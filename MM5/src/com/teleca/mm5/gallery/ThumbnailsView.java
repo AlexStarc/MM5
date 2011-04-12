@@ -36,7 +36,7 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
         try {
             getMainView().setAdapter(mImageAdapter);
             getMainView().setSelector(R.drawable.thumbnail_selector);
-            Button mViewButton = (Button)findViewById(R.id.button1);
+            Button mViewButton = (Button)findViewById(R.id.viewButton);
             mViewButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -45,7 +45,7 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
                 }
             });
 
-            Button mOptionsButton = (Button)findViewById(R.id.button2);
+            Button mOptionsButton = (Button)findViewById(R.id.optionsButton);
             mOptionsButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

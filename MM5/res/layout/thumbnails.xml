@@ -63,14 +63,14 @@
             	android:layout_alignParentLeft="true" 
             	android:layout_height="wrap_content" 
             	android:layout_width="wrap_content" 
-            	android:id="@+id/button1">
+            	android:id="@+id/viewButton">
             </Button>
             <Button 
             	android:layout_alignParentRight="true" 
             	android:text="Options" 
             	android:layout_height="wrap_content" 
             	android:layout_width="wrap_content" 
-            	android:id="@+id/button2">
+            	android:id="@+id/optionsButton">
             </Button>
         </RelativeLayout>
 

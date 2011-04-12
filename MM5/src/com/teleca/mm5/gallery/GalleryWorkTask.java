@@ -9,12 +9,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 
-//enum for results of work task proccessing
-enum GalleryWorkTaskResult {
-    GALLERY_RESULT_EMPTY,
-    GALLERY_RESULT_FINISHED,
-    GALLERY_RESULT_ERROR,
-}
+
 
 
 
@@ -23,6 +18,8 @@ enum GalleryWorkTaskResult {
 
                 description = "applet work task, main purpose - interact with fs and providers"
 )
+
+
 class GalleryWorkTask extends AsyncTask<GalleryContentType, Integer, GalleryWorkTaskResult> {
     private static final String TAG = "GalleryWorkTask";
     private GalleryViewInterface parentGalleryView;
@@ -38,7 +35,47 @@ class GalleryWorkTask extends AsyncTask<GalleryContentType, Integer, GalleryWork
     }
 
     @Override
-    protected GalleryWorkTaskResult doInBackground(GalleryContentType... type) throws IllegalArgumentException {
+    protected void onProgressUpdate(Integer... progress) {
+        parentGalleryView.progressWorkExecution(1);
+    }
+
+    @Override
+    protected void onPostExecute(GalleryWorkTaskResult result) {
+        Log.i( TAG, "bg processign finished, invoke back parent view" );
+        /* Share execution resulted list with parent view,
+         * where's no need to share it if its empty */
+        parentGalleryView.setContentCursor(mainContentCursor);
+
+        /* Share status with parent view in order to notify about errors, if any */
+        parentGalleryView.finishedWorkExecution(result);
+    }
+
+    /**
+     * @param parentGalleryView the parentGalleryView to set
+     */
+    protected final void setParentGalleryView(GalleryViewInterface parentGalleryView) {
+        this.parentGalleryView = parentGalleryView;
+
+        // get content provider here also
+        if( null != parentGalleryView ) {
+            mainContentResolver = parentGalleryView.getGalleryViewContext().getContentResolver();
+        }
+    }
+
+    /**
+     * @return the parentGalleryView
+     */
+    protected final GalleryViewInterface getParentGalleryView() {
+        return parentGalleryView;
+    }
+
+    @Override
+    public String toString() {
+        return ("GalleryWorkTask <" + parentGalleryView.toString() + ">");
+    }
+
+    @Override
+    protected GalleryWorkTaskResult doInBackground(GalleryContentType... params) {
         GalleryWorkTaskResult resultProcessing = GalleryWorkTaskResult.GALLERY_RESULT_ERROR;
         String mediaStorageState = Environment.getExternalStorageState();
         Uri uriGalleryContent = null;
@@ -49,12 +86,11 @@ class GalleryWorkTask extends AsyncTask<GalleryContentType, Integer, GalleryWork
             // first of all ensure we'll get refreshed data by sending intent to MediaScanner
             try {
                 parentGalleryView.getGalleryViewContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://"+ Environment.getExternalStorageDirectory())));
-            }
-            catch(Exception e) {
+            } catch(Exception e) {
                 Log.e( TAG, "doInBackground(): " + e.getClass() + " thrown " + e.getMessage());
             }
 
-            switch(type[0]) {
+            switch(params[0]) {
             case GALLERY_AUDIO:
                 uriGalleryContent = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
                 break;
@@ -98,45 +134,5 @@ class GalleryWorkTask extends AsyncTask<GalleryContentType, Integer, GalleryWork
         }
 
         return resultProcessing;
-    }
-
-    @Override
-    protected void onProgressUpdate(Integer... progress) {
-        parentGalleryView.progressWorkExecution(1);
-    }
-
-    @Override
-    protected void onPostExecute(GalleryWorkTaskResult result) {
-        Log.i( TAG, "bg processign finished, invoke back parent view" );
-        /* Share execution resulted list with parent view,
-         * where's no need to share it if its empty */
-        parentGalleryView.setContentCursor(mainContentCursor);
-
-        /* Share status with parent view in order to notify about errors, if any */
-        parentGalleryView.finishedWorkExecution(result);
-    }
-
-    /**
-     * @param parentGalleryView the parentGalleryView to set
-     */
-    protected final void setParentGalleryView(GalleryViewInterface parentGalleryView) {
-        this.parentGalleryView = parentGalleryView;
-
-        // get content provider here also
-        if( null != parentGalleryView ) {
-            mainContentResolver = parentGalleryView.getGalleryViewContext().getContentResolver();
-        }
-    }
-
-    /**
-     * @return the parentGalleryView
-     */
-    protected final GalleryViewInterface getParentGalleryView() {
-        return parentGalleryView;
-    }
-
-    @Override
-    public String toString() {
-        return ("GalleryWorkTask <" + parentGalleryView.toString() + ">");
     }
 }
