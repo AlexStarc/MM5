@@ -10,6 +10,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
@@ -22,6 +24,7 @@ public class ListViewCursorAdapter extends CursorAdapter {
     private Context context = null;
     private Integer elementLayout = 0;
     private final String TAG = "ListViewCursorAdapter";
+    private OnClickListener playButtonListener = null;
 
     /**
      * ListViewCursorAdapter - main constructor
@@ -31,10 +34,11 @@ public class ListViewCursorAdapter extends CursorAdapter {
      * @param autoRequery - boolean flag to allow auto-requery;
      * @param elementLayoutId - layout id to be used for single element;
      */
-    public ListViewCursorAdapter(Context context, Cursor c, boolean autoRequery, int elementLayoutId) {
+    public ListViewCursorAdapter(Context context, Cursor c, boolean autoRequery, int elementLayoutId, OnClickListener clickListener) {
         super(context, c, autoRequery);
         this.context = context;
         elementLayout = elementLayoutId;
+        playButtonListener = clickListener;
         Log.e(TAG, "created");
     }
 
@@ -52,7 +56,6 @@ public class ListViewCursorAdapter extends CursorAdapter {
         } catch(Exception e) {
             Log.e(TAG, "bindView(): " + e.getClass() + " thrown " + e.getMessage());
         }
-
     }
 
     @Override
@@ -65,9 +68,14 @@ public class ListViewCursorAdapter extends CursorAdapter {
             int fileNameCol = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME);
             String fileName = cursor.getString(fileNameCol);
             TextView fileNameView = (TextView)elementView.findViewById(R.id.listview_item_text);
+            Button playButton = (Button)elementView.findViewById(R.id.listview_item_play);
 
             if(null != fileNameView) {
                 fileNameView.setText(fileName);
+            }
+
+            if(null != playButton) {
+                playButton.setOnClickListener(playButtonListener);
             }
         } catch(Exception e) {
             Log.e(TAG, "newView(): " + e.getClass() + " thrown " + e.getMessage());

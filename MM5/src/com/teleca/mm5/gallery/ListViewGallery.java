@@ -27,30 +27,38 @@
  */
 package com.teleca.mm5.gallery;
 
+import android.database.Cursor;
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 
 /**
  * @author negr
  *
  */
-public class ListViewGallery extends GalleryView<ListView> implements GalleryViewInterface {
+public class ListViewGallery extends GalleryView<ListView> implements GalleryViewInterface, OnClickListener {
     private static final String TAG = "ListViewGallery";
     private Integer nFocusIndex = 0;
+    private Integer nPlayIndex = -1;
     private ListViewCursorAdapter contentAdapter = null;
+    private MediaPlayer player = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
         setContentType(GalleryViewType.GALLERY_LIST);
         super.onCreate(savedInstanceState);
-    }
 
-    private void update(int mSelectItemId, View selectedView){
+        // create MediaPlayer for playing of selected sound
+        player = new MediaPlayer();
     }
 
     @Override
@@ -69,7 +77,7 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
                 @Override
                 public void onItemSelected(AdapterView<?> arg0, View view,
                                            int mSelectItemId, long arg3) {
-                    update(mSelectItemId, view);
+                    nFocusIndex = mSelectItemId;
                 }
 
                 @Override
@@ -77,22 +85,67 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
                 }
             });
 
-            getMainView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-                @Override
-                public void onItemClick(AdapterView<?> arg0, View view,
-                                        int mSelectItemId, long arg3) {
-                    nFocusIndex = mSelectItemId;
-                    update(mSelectItemId, view);
-                }
-            });
-
             // create adapter based on received cursor and attach it to list view
             contentAdapter = new ListViewCursorAdapter(getApplicationContext(),
                                                        getContentCursor(),
                                                        false,
-                                                       R.layout.listviewgallery_item);
+                                                       R.layout.listviewgallery_item,
+                                                       this);
             getMainView().setAdapter(contentAdapter);
         }
+    }
+
+    @Override
+    public void onClick(View v) {
+        try {
+            // Listener for play click
+            View listItemView = (View)v.getParent();
+            // try determine index of selected view
+            Integer selectedIndex = getMainView().indexOfChild(listItemView);
+            Button playButton = null;
+
+            // need to obtain full file name to be played
+            Cursor cur = getContentCursor();
+
+            if( 0 <= nPlayIndex ) {
+                View playingItem = getMainView().getChildAt(nPlayIndex);
+
+                playButton = (Button)playingItem.findViewById(R.id.listview_item_play);
+
+                playButton.setBackgroundResource(R.drawable.listview_item_button);
+            }
+
+            player.reset();
+
+            if(selectedIndex == nPlayIndex)
+            {
+                nPlayIndex = -1;
+            } else {
+                cur.moveToPosition(selectedIndex);
+                player.setDataSource(cur.getString(cur.getColumnIndex(MediaStore.MediaColumns.DATA)));
+                player.prepare();
+                player.start();
+                nPlayIndex = selectedIndex;
+                playButton = (Button)listItemView.findViewById(R.id.listview_item_play);
+
+                playButton.setBackgroundResource(R.drawable.listview_item_stop_button);
+            }
+        } catch(Exception e) {
+            Log.e(TAG, "onClick(): " + e.getClass() + " thrown " + e.getMessage());
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        player.reset();
+
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        player.reset();
+
+        super.onStop();
     }
 }
