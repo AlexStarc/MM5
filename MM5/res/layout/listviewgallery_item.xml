@@ -7,6 +7,7 @@
             android:layout_height="32dp"
             android:padding="10dp"
             android:background="@drawable/listview_item_button"
+            android:focusable="false"
             android:id="@+id/listview_item_play">
     </Button>
     <TextView android:layout_alignParentLeft="true"

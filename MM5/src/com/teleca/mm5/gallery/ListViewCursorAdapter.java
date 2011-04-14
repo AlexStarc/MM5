@@ -9,8 +9,8 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
@@ -33,12 +33,12 @@ public class ListViewCursorAdapter extends CursorAdapter {
      * @param c - cursor to be used for adapter;
      * @param autoRequery - boolean flag to allow auto-requery;
      * @param elementLayoutId - layout id to be used for single element;
+     * @param clickListener - listener for buttons on list items;
      */
-    public ListViewCursorAdapter(Context context, Cursor c, boolean autoRequery, int elementLayoutId, OnClickListener clickListener) {
+    public ListViewCursorAdapter(Context context, Cursor c, boolean autoRequery, int elementLayoutId) {
         super(context, c, autoRequery);
         this.context = context;
         elementLayout = elementLayoutId;
-        playButtonListener = clickListener;
         Log.e(TAG, "created");
     }
 
@@ -53,6 +53,8 @@ public class ListViewCursorAdapter extends CursorAdapter {
             if(null != fileNameView) {
                 fileNameView.setText(fileName);
             }
+
+            elementView.setTag(new GalleryContentItem(fileName, cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.DATA))));
         } catch(Exception e) {
             Log.e(TAG, "bindView(): " + e.getClass() + " thrown " + e.getMessage());
         }
@@ -75,8 +77,11 @@ public class ListViewCursorAdapter extends CursorAdapter {
             }
 
             if(null != playButton) {
-                playButton.setOnClickListener(playButtonListener);
+                playButton.setOnClickListener(getPlayButtonListener());
             }
+
+            // create and set GalleryContentItem as tag to every view
+            elementView.setTag(new GalleryContentItem(fileName, cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.DATA))));
         } catch(Exception e) {
             Log.e(TAG, "newView(): " + e.getClass() + " thrown " + e.getMessage());
         }
@@ -84,4 +89,17 @@ public class ListViewCursorAdapter extends CursorAdapter {
         return elementView;
     }
 
+    /**
+     * @param playButtonListener the playButtonListener to set
+     */
+    public void setPlayButtonListener(OnClickListener playButtonListener) {
+        this.playButtonListener = playButtonListener;
+    }
+
+    /**
+     * @return the playButtonListener
+     */
+    public OnClickListener getPlayButtonListener() {
+        return playButtonListener;
+    }
 }

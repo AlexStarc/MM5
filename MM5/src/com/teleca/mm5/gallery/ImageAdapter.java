@@ -119,8 +119,7 @@ public class ImageAdapter extends BaseAdapter implements Callback {
                 imageView.setImageBitmap(mPlaceHolder);
             }
 
-            mContentItemsArray[position] = new GalleryContentItem(null,
-                                                                  null);
+            mContentItemsArray[position] = new GalleryContentItem();
             // file name obtained, now provide image loading in separate thread
             mDecodingThreadPool.execute( new ContentImageLoader(contentCursor,
                                                                 position,

@@ -27,10 +27,8 @@
  */
 package com.teleca.mm5.gallery;
 
-import android.database.Cursor;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -47,7 +45,7 @@ import android.widget.ListView;
 public class ListViewGallery extends GalleryView<ListView> implements GalleryViewInterface, OnClickListener {
     private static final String TAG = "ListViewGallery";
     private Integer nFocusIndex = 0;
-    private Integer nPlayIndex = -1;
+    private View    playView = null;
     private ListViewCursorAdapter contentAdapter = null;
     private MediaPlayer player = null;
 
@@ -89,8 +87,8 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
             contentAdapter = new ListViewCursorAdapter(getApplicationContext(),
                                                        getContentCursor(),
                                                        false,
-                                                       R.layout.listviewgallery_item,
-                                                       this);
+                                                       R.layout.listviewgallery_item);
+            contentAdapter.setPlayButtonListener(this);
             getMainView().setAdapter(contentAdapter);
         }
     }
@@ -100,32 +98,27 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
         try {
             // Listener for play click
             View listItemView = (View)v.getParent();
-            // try determine index of selected view
-            Integer selectedIndex = getMainView().indexOfChild(listItemView);
             Button playButton = null;
 
-            // need to obtain full file name to be played
-            Cursor cur = getContentCursor();
-
-            if( 0 <= nPlayIndex ) {
-                View playingItem = getMainView().getChildAt(nPlayIndex);
-
-                playButton = (Button)playingItem.findViewById(R.id.listview_item_play);
+            if( playView != null ) {
+                playButton = (Button)playView.findViewById(R.id.listview_item_play);
 
                 playButton.setBackgroundResource(R.drawable.listview_item_button);
             }
 
             player.reset();
 
-            if(selectedIndex == nPlayIndex)
+            if(null != playView &&
+               playView.equals(listItemView))
             {
-                nPlayIndex = -1;
+                playView = null;
             } else {
-                cur.moveToPosition(selectedIndex);
-                player.setDataSource(cur.getString(cur.getColumnIndex(MediaStore.MediaColumns.DATA)));
+                GalleryContentItem itemTag = (GalleryContentItem)listItemView.getTag();
+
+                player.setDataSource(itemTag.getContentPath());
                 player.prepare();
                 player.start();
-                nPlayIndex = selectedIndex;
+                playView = listItemView;
                 playButton = (Button)listItemView.findViewById(R.id.listview_item_play);
 
                 playButton.setBackgroundResource(R.drawable.listview_item_stop_button);
