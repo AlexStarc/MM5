@@ -131,14 +131,14 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
     @Override
     protected void onPause() {
         player.reset();
-
+        playView = null;
         super.onPause();
     }
 
     @Override
     protected void onStop() {
         player.reset();
-
+        playView = null;
         super.onStop();
     }
 }
