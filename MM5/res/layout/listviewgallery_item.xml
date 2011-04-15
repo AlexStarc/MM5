@@ -3,9 +3,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
     <Button android:layout_alignParentRight="true"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_centerVertical="true"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:padding="10dp"
+            android:layout_margin="10dp"
             android:background="@drawable/listview_item_button"
             android:focusable="false"
             android:id="@+id/listview_item_play">
@@ -15,6 +17,7 @@
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
               android:id="@+id/listview_item_text"
-              android:layout_centerVertical="true">
+              android:layout_centerVertical="true"
+              android:textSize="30dp">
     </TextView>
 </RelativeLayout>

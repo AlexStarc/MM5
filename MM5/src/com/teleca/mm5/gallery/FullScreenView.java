@@ -3,6 +3,7 @@
  */
 package com.teleca.mm5.gallery;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -11,22 +12,32 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 /**
  * @author astarche
  *
  */
-public class FullScreenView extends GalleryView<ImageView> implements GalleryViewInterface, Handler.Callback, View.OnClickListener {
+public class FullScreenView extends GalleryView<ImageView> implements GalleryViewInterface, Handler.Callback, View.OnClickListener, Animation.AnimationListener {
 
     private final static String TAG = "FullScreenView";
     private Integer nFocusIndex = 0;
     private Thread mImgLoader = null;
-    private static final int SWIPE_MIN_DISTANCE = 120;
-    private static final int SWIPE_MAX_OFF_PATH = 250;
-    private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+    private static final int SWIPE_MIN_DISTANCE = 60;
+    private static final int SWIPE_MAX_OFF_PATH = 350;
+    private static final int SWIPE_THRESHOLD_VELOCITY = 100;
     private GestureDetector gestureDetector = null;
     View.OnTouchListener gestureListener = null;
+    private Animation nextImgAnimation = null;
+    private Animation nextImgRemoveAnimation = null;
+    private Animation prevImgAnimation = null;
+    private Animation prevImgRemoveAnimation = null;
+    private Bitmap nextBitmap = null;
+    private Boolean bMovingforward = true;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -35,7 +46,9 @@ public class FullScreenView extends GalleryView<ImageView> implements GalleryVie
 
         nFocusIndex = extraParameters.getInt("com.teleca.mm5.gallery.FocusIndex", 0);
         setContentType(GalleryViewType.GALLERY_FULLSCREEN);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         super.onCreate(savedInstanceState);
+        setProgressBarVisibility(true);
 
         // Gesture detections
         gestureDetector = new GestureDetector(new FullScreenGestureDetector());
@@ -52,6 +65,13 @@ public class FullScreenView extends GalleryView<ImageView> implements GalleryVie
         getMainView().setOnClickListener(this);
         getMainView().setOnTouchListener(gestureListener);
 
+        // initialize animations for images changing
+        nextImgAnimation = AnimationUtils.loadAnimation(this, R.anim.fullscreenview_nextimg);
+        nextImgAnimation.setAnimationListener(this);
+        nextImgRemoveAnimation = AnimationUtils.loadAnimation(this, R.anim.fullscreenview_nextimg_remove);
+        prevImgAnimation = AnimationUtils.loadAnimation(this, R.anim.fullscreenview_previmg);
+        prevImgAnimation.setAnimationListener(this);
+        prevImgRemoveAnimation = AnimationUtils.loadAnimation(this, R.anim.fullscreenview_previmg_remove);
     }
 
     @Override
@@ -77,14 +97,27 @@ public class FullScreenView extends GalleryView<ImageView> implements GalleryVie
             try {
                 // put decoded image into main layout view
                 ImageView mainView = getMainView();
+                ImageView nextImageView = (ImageView)findViewById(R.id.fullscrImageViewNext);
+
+                /* here we'll create new view similar to main one in order to provide slide animation
+                 * and remove original when animation ends */
+
+                ((ProgressBar)findViewById(R.id.progress_large)).setVisibility(View.GONE);
 
                 if(null != mainView) {
                     itemImageLoader = (ContentImageLoader) loaderMsg.obj;
 
                     if(null != itemImageLoader) {
-                        mainView.setImageBitmap(itemImageLoader.getBm());
+                        nextImageView.setVisibility(View.VISIBLE);
+                        nextImageView.setImageBitmap(itemImageLoader.getBm());
+                        // store new bitmap
+                        nextBitmap = itemImageLoader.getBm();
+                        nextImageView.startAnimation(bMovingforward ? nextImgAnimation : prevImgAnimation);
+                        getMainView().startAnimation(bMovingforward ? nextImgRemoveAnimation : prevImgRemoveAnimation);
                     }
                 }
+
+                // hide loading progress bar
             } catch (Exception e) {
                 Log.e(TAG,
                       "handleMessage(): " + e.getClass() + " thrown "
@@ -113,18 +146,28 @@ public class FullScreenView extends GalleryView<ImageView> implements GalleryVie
                 if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH) {
                     return false;
                 }
+
                 // right to left swipe
                 if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                    if( nFocusIndex > 0 ) {
-                        nFocusIndex--;
-                        bNeedReload = true;
-                    }
-                }  else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                    // Swipe right - increase focus
-                    if(null != getContentCursor() &&
-                       nFocusIndex < (getContentCursor().getCount() - 1) ) {
+                    if( nFocusIndex < (getContentCursor().getCount() - 1) ) {
                         nFocusIndex++;
+                    } else {
+                        nFocusIndex = 0;
+                    }
+
+                    bNeedReload = true;
+                    bMovingforward = true;
+                } else if(e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                    // Swipe right - increase focus
+                    if(null != getContentCursor()) {
+                        if( nFocusIndex > 0 ) {
+                            nFocusIndex--;
+                        } else {
+                            nFocusIndex = (getContentCursor().getCount() - 1);
+                        }
+
                         bNeedReload = true;
+                        bMovingforward = false;
                     }
                 }
 
@@ -134,6 +177,10 @@ public class FullScreenView extends GalleryView<ImageView> implements GalleryVie
                         mImgLoader.stop();
                     }
 
+                    // indicate loading
+                    ((ProgressBar)findViewById(R.id.progress_large)).setVisibility(View.VISIBLE);
+
+                    // load next image
                     mImgLoader = new Thread( new ContentImageLoader(getContentCursor(),
                                                                     nFocusIndex,
                                                                     new Handler(FullScreenView.this),
@@ -146,6 +193,7 @@ public class FullScreenView extends GalleryView<ImageView> implements GalleryVie
                       "handleMessage(): " + e.getClass() + " thrown "
                       + e.getMessage());
             }
+
             return false;
         }
 
@@ -154,6 +202,24 @@ public class FullScreenView extends GalleryView<ImageView> implements GalleryVie
     @Override
     public void onClick(View v) {
         // Left empty by intension to allow gestures handling
+    }
+
+    @Override
+    public void onAnimationEnd(Animation animation) {
+        // set new image to main view and hide next image view
+        getMainView().setImageBitmap(nextBitmap);
+        nextBitmap = null;
+    }
+
+    @Override
+    public void onAnimationRepeat(Animation animation) {
+        // Left empty, because don't need handling of repeation
+
+    }
+
+    @Override
+    public void onAnimationStart(Animation animation) {
+        // Left empty, because don't need start handling
     }
 
 }

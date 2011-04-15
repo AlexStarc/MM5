@@ -1,7 +1,6 @@
 package com.teleca.mm5.gallery;
 
 import android.content.ContentResolver;
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -83,13 +82,6 @@ class GalleryWorkTask extends AsyncTask<GalleryContentType, Integer, GalleryWork
         Log.i( TAG, "work task bg processing started with media state " + mediaStorageState);
 
         if (Environment.MEDIA_MOUNTED.equals(mediaStorageState)) {
-            // first of all ensure we'll get refreshed data by sending intent to MediaScanner
-            try {
-                parentGalleryView.getGalleryViewContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://"+ Environment.getExternalStorageDirectory())));
-            } catch(Exception e) {
-                Log.e( TAG, "doInBackground(): " + e.getClass() + " thrown " + e.getMessage());
-            }
-
             switch(params[0]) {
             case GALLERY_AUDIO:
                 uriGalleryContent = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
