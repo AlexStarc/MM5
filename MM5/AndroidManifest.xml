@@ -3,15 +3,34 @@
       package="com.teleca.mm5.gallery"
       android:versionCode="1"
       android:versionName="1.0">
-    <uses-sdk android:minSdkVersion="11" />
+    <uses-sdk android:minSdkVersion="10" />
 
-    <application android:icon="@drawable/icon" android:label="@string/app_name">
+    <application android:windowAnimationStyle="@android:style/Animation.Translucent">
         <activity android:name=".gallery"
-                  android:label="@string/app_name">
+                  android:label="@string/app_name"
+                  android:activityOpenEnterAnimation="@android:style/Animation.Translucent"
+                  android:activityCloseExitAnimation="@android:style/Animation.Translucent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
+        <activity android:name="ThumbnailsView"
+                  android:label="@string/thumbnails"
+                  android:icon="@drawable/icon_thumbnail"
+                  android:activityOpenEnterAnimation="@android:style/Animation.Translucent"
+                  android:activityCloseExitAnimation="@android:style/Animation.Translucent">
+        </activity>
+        <activity android:name="FullScreenView"
+                  android:label="@string/fullscreen"
+                  android:icon="@drawable/icon_thumbnail"
+                  android:activityOpenEnterAnimation="@android:style/Animation.Translucent"
+                  android:activityCloseExitAnimation="@android:style/Animation.Translucent">
+        </activity>
+        <activity android:name="ListViewGallery"
+                  android:label="@string/ListView"
+                  android:activityOpenEnterAnimation="@android:style/Animation.Translucent"
+                  android:activityCloseExitAnimation="@android:style/Animation.Translucent">
+        </activity>
+</application>
 </manifest>
