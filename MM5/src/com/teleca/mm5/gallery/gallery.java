@@ -60,6 +60,7 @@ public class gallery extends GalleryView<ListView> implements OnItemClickListene
         super.onCreate(savedInstanceState);
 
         try {
+            getMainView().addHeaderView(getLayoutInflater().inflate(R.layout.mainmenu_title, null), null, false);
             getMainView().setAdapter(new ArrayAdapter<String>(this, R.layout.mainmenu_item, getResources().getStringArray(R.array.mainmenu_items) ));
         } catch(Exception e) {
             Log.e( TAG, "onCreate(): " + e.getClass() + " thrown " + e.getMessage());
@@ -102,17 +103,22 @@ public class gallery extends GalleryView<ListView> implements OnItemClickListene
                        Toast.LENGTH_SHORT).show();
 
         switch( position ) {
-        // Thumbnails
-        case 0:
+        // Images
+        case 1:
             intent = new Intent(this, ThumbnailsView.class);
             startActivity(intent);
             break;
 
-        // List
-        case 1:
+        // Sounds
+        case 2:
             intent = new Intent(this, ListViewGallery.class);
             startActivity(intent);
             break;
+
+        // Help
+        case 3:
+            break;
+
         default:
             break;
         }

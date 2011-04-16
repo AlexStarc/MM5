@@ -22,7 +22,7 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
     private ImageAdapter mImageAdapter;
     private static final String TAG = "ThumbnailsView";
     private Animation mSelectionAnimation = null;
-    private Integer nFocusIndex = 0;
+    private Integer nFocusIndex = -1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -119,25 +119,33 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
+        boolean retVal = true;
 
         switch (item.getItemId()) {
         case R.id.DETAILS_ID :
             /*!! Intent intent = new Intent(this, DetaisView.class);
             startActivity(intent);!!*/
-            return true;
+            retVal = true;
+            break;
+
         case R.id.LISTVIEW_ID:
             /*!! Intent intent = new Intent(this, ListViewView.class);
             startActivity(intent);!!*/
-            return true;
+            retVal = true;
+            break;
 
         case R.id.FULLSCREEN_ID:
-            /*!! Intent intent = new Intent(this, FullScreenView.class);
-            startActivity(intent);!!*/
-            return true;
+            Intent launchFullScreen = new Intent(getGalleryViewContext(), FullScreenView.class);
+            startActivity(launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", nFocusIndex));
+            retVal = true;
+            break;
 
         default:
-            return false;
+            retVal = false;
+            break;
         }
+
+        return retVal;
     }
 
     @Override
@@ -165,8 +173,15 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
                 @Override
                 public void onItemClick(AdapterView<?> arg0, View view,
                                         int mSelectItemId, long arg3) {
-                    nFocusIndex = mSelectItemId;
-                    update(mSelectItemId, view);
+
+                    // if the same image has been selected again, open fullscreen view
+                    if( nFocusIndex == mSelectItemId ) {
+                        Intent launchFullScreen = new Intent(getGalleryViewContext(), FullScreenView.class);
+                        startActivity(launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", nFocusIndex));
+                    } else {
+                        nFocusIndex = mSelectItemId;
+                        update(mSelectItemId, view);
+                    }
                 }
             });
 
@@ -180,6 +195,8 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
                     if( null != mResizeImage )
                     {
                         mResizeImage.setImageBitmap(null);
+                        // reset focus index also
+                        nFocusIndex = -1;
                     }
                 }
 

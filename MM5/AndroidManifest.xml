@@ -6,9 +6,10 @@
     <uses-sdk android:minSdkVersion="8" />
 
     <application android:windowAnimationStyle="@android:style/Animation.Translucent"
-                 android:debuggable="true">
+                 android:debuggable="true"
+                 android:icon="@drawable/icon"
+                 android:label="@string/app_name">
         <activity android:name=".gallery"
-                  android:label="@string/app_name"
                   android:activityOpenEnterAnimation="@android:style/Animation.Translucent"
                   android:activityCloseExitAnimation="@android:style/Animation.Translucent">
             <intent-filter>
@@ -17,19 +18,16 @@
             </intent-filter>
         </activity>
         <activity android:name="ThumbnailsView"
-                  android:label="@string/thumbnails"
                   android:icon="@drawable/icon_thumbnail"
                   android:activityOpenEnterAnimation="@android:style/Animation.Translucent"
                   android:activityCloseExitAnimation="@android:style/Animation.Translucent">
         </activity>
         <activity android:name="FullScreenView"
-                  android:label="@string/fullscreen"
                   android:icon="@drawable/icon_thumbnail"
                   android:activityOpenEnterAnimation="@android:style/Animation.Translucent"
                   android:activityCloseExitAnimation="@android:style/Animation.Translucent">
         </activity>
         <activity android:name="ListViewGallery"
-                  android:label="@string/ListView"
                   android:activityOpenEnterAnimation="@android:style/Animation.Translucent"
                   android:activityCloseExitAnimation="@android:style/Animation.Translucent">
         </activity>

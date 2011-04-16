@@ -3,8 +3,6 @@
  */
 package com.teleca.mm5.gallery;
 
-import java.io.FileInputStream;
-
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -25,9 +23,11 @@ public class ContentImageLoader implements Runnable {
     private Integer nRequiredWidth;
     private Integer nRequiredHeight;
     private final static String TAG = "ContentImageLoader";
+    private BitmapFactory.Options decodeOpt = null;
 
     /**
      * Creates an ImageLoader object with the specified parameters.
+     *
      * @param contentPath path to the image which should be loaded
      * @param nItemId item id in the list
      * @param callerHdlr handler which will receive message about decoding finish
@@ -38,12 +38,33 @@ public class ContentImageLoader implements Runnable {
                               Integer nItemId,
                               Handler callerHdlr,
                               int nRequiredWidth,
-                              int nRequiredHeight) {
+                              int nRequiredHeight,
+                              int densityDpi,
+                              boolean bKeepQuality) {
         this.imagesCursor = imagesCursor;
         this.callerHdlr = callerHdlr;
         this.nRequiredWidth = nRequiredWidth;
         this.nRequiredHeight = nRequiredHeight;
         this.setnItemId(nItemId);
+
+        decodeOpt = new BitmapFactory.Options();
+        if( nRequiredWidth > 0 && nRequiredHeight > 0 ) {
+            decodeOpt.outHeight = nRequiredHeight;
+            decodeOpt.outWidth = nRequiredWidth;
+
+            if(!bKeepQuality) {
+                decodeOpt.inSampleSize = 4;
+            } else {
+                decodeOpt.inSampleSize = 2;
+            }
+
+            // use 96 DPI as common for displays
+            decodeOpt.inDensity = 72;
+            decodeOpt.inPurgeable = true;
+            //decodeOpt.inScreenDensity = densityDpi;
+            decodeOpt.inTargetDensity = 72;
+            decodeOpt.inScaled = true;
+        }
     }
 
     @Override
@@ -63,14 +84,17 @@ public class ContentImageLoader implements Runnable {
                 try {
                     imagesCursor.moveToPosition(nItemId);
                     contentPath = imagesCursor.getString(imagesCursor.getColumnIndex(MediaStore.Images.Media.DATA));
+
+                    if(null != contentPath)
+                    {
+                        // try to make GC every time before we're decoding new image
+                        System.gc();
+                        srcBitmap = BitmapFactory.decodeFile( contentPath,
+                                                              decodeOpt );
+                    }
                 } catch (Exception e) {
                     Log.e(TAG,
                           "run(): " + e.getClass() + " thrown " + e.getMessage());
-                }
-
-                if(null != contentPath)
-                {
-                    srcBitmap = BitmapFactory.decodeStream( new FileInputStream( contentPath ) );
                 }
             }
 

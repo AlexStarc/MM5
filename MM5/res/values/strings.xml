@@ -8,10 +8,10 @@
     <string name="ListView">Sounds List</string>
     <string name="FullScreen">Image Full Screen</string>
     <string name="fullscreen">Image Full Screen</string>
+    <string name="mainmenu_title">Select content type You want to check out</string>
     <string-array name="mainmenu_items">
-        <item>"Images Thumbnails"</item>
-        <item>"Sounds List"</item>
-        <item>"Images FullScreen"</item>
+        <item>"My Images"</item>
+        <item>"My Sounds"</item>
         <item>"Help"</item>
     </string-array>
 </resources>

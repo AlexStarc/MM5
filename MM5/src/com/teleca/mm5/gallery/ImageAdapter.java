@@ -36,6 +36,7 @@ public class ImageAdapter extends BaseAdapter implements Callback {
     private Bitmap mPlaceHolder = null;
     private ThreadPoolExecutor mDecodingThreadPool = null;
     private final ArrayBlockingQueue<Runnable> mDecodingQueue = new ArrayBlockingQueue<Runnable>(SIMULATEOS_DECODING_THREADS_COUNT * 50);
+    private DisplayMetrics metrics = null;
 
     public ImageAdapter(Context mDataContext, Cursor contentCursor) {
         mContext = mDataContext;
@@ -49,7 +50,7 @@ public class ImageAdapter extends BaseAdapter implements Callback {
 
         if( ImageAdapter.zoomThumbnailWidth.equals(0) ) {
             // get display metrics to determine proper resizing
-            DisplayMetrics metrics = new DisplayMetrics();
+            metrics = new DisplayMetrics();
             ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getMetrics(metrics);
 
             ImageAdapter.zoomThumbnailWidth = ((Float)(ImageAdapter.ZOOM_THUMBNAIL_WIDTH_DPI * metrics.density)).intValue();
@@ -125,7 +126,9 @@ public class ImageAdapter extends BaseAdapter implements Callback {
                                                                 position,
                                                                 new Handler(this),
                                                                 ImageAdapter.zoomThumbnailWidth,
-                                                                ImageAdapter.zoomThumbnailHeight) );
+                                                                ImageAdapter.zoomThumbnailHeight,
+                                                                metrics.densityDpi,
+                                                                false) );
         }
 
         return imageView;

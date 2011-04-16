@@ -3,16 +3,19 @@
  */
 package com.teleca.mm5.gallery;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
@@ -38,6 +41,7 @@ public class FullScreenView extends GalleryView<ImageView> implements GalleryVie
     private Animation prevImgRemoveAnimation = null;
     private Bitmap nextBitmap = null;
     private Boolean bMovingforward = true;
+    private DisplayMetrics metrics = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,6 +62,7 @@ public class FullScreenView extends GalleryView<ImageView> implements GalleryVie
                 if (gestureDetector.onTouchEvent(event)) {
                     return true;
                 }
+
                 return false;
             }
         };
@@ -81,11 +86,15 @@ public class FullScreenView extends GalleryView<ImageView> implements GalleryVie
             mImgLoader.stop();
         }
 
+        metrics = new DisplayMetrics();
+        ((WindowManager)getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getMetrics(metrics);
         mImgLoader = new Thread( new ContentImageLoader(getContentCursor(),
                                                         nFocusIndex,
                                                         new Handler(this),
-                                                        -1,
-                                                        -1) );
+                                                        metrics.widthPixels,
+                                                        metrics.heightPixels,
+                                                        metrics.densityDpi,
+                                                        true) );
         mImgLoader.run();
     }
 
@@ -112,6 +121,7 @@ public class FullScreenView extends GalleryView<ImageView> implements GalleryVie
                         nextImageView.setImageBitmap(itemImageLoader.getBm());
                         // store new bitmap
                         nextBitmap = itemImageLoader.getBm();
+                        // cancel all previous animations if any
                         nextImageView.startAnimation(bMovingforward ? nextImgAnimation : prevImgAnimation);
                         getMainView().startAnimation(bMovingforward ? nextImgRemoveAnimation : prevImgRemoveAnimation);
                     }
@@ -143,50 +153,53 @@ public class FullScreenView extends GalleryView<ImageView> implements GalleryVie
             boolean bNeedReload = false;
 
             try {
-                if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH) {
-                    return false;
-                }
-
-                // right to left swipe
-                if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                    if( nFocusIndex < (getContentCursor().getCount() - 1) ) {
-                        nFocusIndex++;
-                    } else {
-                        nFocusIndex = 0;
-                    }
-
-                    bNeedReload = true;
-                    bMovingforward = true;
-                } else if(e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                    // Swipe right - increase focus
-                    if(null != getContentCursor()) {
-                        if( nFocusIndex > 0 ) {
-                            nFocusIndex--;
+                if(Math.abs(e1.getY() - e2.getY()) <= SWIPE_MAX_OFF_PATH &&
+                   // no need to do any processing if animations arei n progress
+                   ( !nextImgAnimation.hasStarted() || nextImgAnimation.hasEnded() ) &&
+                   ( !prevImgAnimation.hasStarted() || prevImgAnimation.hasEnded() )) {
+                    // right to left swipe
+                    if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                        if( nFocusIndex < (getContentCursor().getCount() - 1) ) {
+                            nFocusIndex++;
                         } else {
-                            nFocusIndex = (getContentCursor().getCount() - 1);
+                            nFocusIndex = 0;
                         }
 
                         bNeedReload = true;
-                        bMovingforward = false;
+                        bMovingforward = true;
+                    } else if(e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                        // Swipe right - increase focus
+                        if(null != getContentCursor()) {
+                            if( nFocusIndex > 0 ) {
+                                nFocusIndex--;
+                            } else {
+                                nFocusIndex = (getContentCursor().getCount() - 1);
+                            }
+
+                            bNeedReload = true;
+                            bMovingforward = false;
+                        }
                     }
-                }
 
-                if( bNeedReload ) {
-                    // Try to load image from the cursor using the index
-                    if(null != mImgLoader) {
-                        mImgLoader.stop();
+                    if( bNeedReload ) {
+                        // Try to load image from the cursor using the index
+                        if(null != mImgLoader) {
+                            mImgLoader.stop();
+                        }
+
+                        // indicate loading
+                        ((ProgressBar)findViewById(R.id.progress_large)).setVisibility(View.VISIBLE);
+
+                        // load next image
+                        mImgLoader = new Thread( new ContentImageLoader(getContentCursor(),
+                                                                        nFocusIndex,
+                                                                        new Handler(FullScreenView.this),
+                                                                        metrics.widthPixels,
+                                                                        metrics.heightPixels,
+                                                                        metrics.densityDpi,
+                                                                        true) );
+                        mImgLoader.run();
                     }
-
-                    // indicate loading
-                    ((ProgressBar)findViewById(R.id.progress_large)).setVisibility(View.VISIBLE);
-
-                    // load next image
-                    mImgLoader = new Thread( new ContentImageLoader(getContentCursor(),
-                                                                    nFocusIndex,
-                                                                    new Handler(FullScreenView.this),
-                                                                    -1,
-                                                                    -1) );
-                    mImgLoader.run();
                 }
             } catch (Exception e) {
                 Log.e(TAG,
