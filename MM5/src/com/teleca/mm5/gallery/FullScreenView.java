@@ -222,6 +222,8 @@ public class FullScreenView extends GalleryView<ImageView> implements GalleryVie
         // set new image to main view and hide next image view
         getMainView().setImageBitmap(nextBitmap);
         nextBitmap = null;
+        // try to clean heap after loaded image
+        System.gc();
     }
 
     @Override

@@ -109,14 +109,12 @@ public class ImageAdapter extends BaseAdapter implements Callback {
         }
 
         if (null != mContentItemsArray[position]) {
-            if( null != mContentItemsArray[position].getContentBitmap() )
-            {
+            if( null != mContentItemsArray[position].getContentBitmap() ) {
                 imageView.setImageBitmap(mContentItemsArray[position].getContentBitmap());
             }
         } else {
             // set thumbnail placeholder in place of loading image
-            if( null != mPlaceHolder)
-            {
+            if( null != mPlaceHolder) {
                 imageView.setImageBitmap(mPlaceHolder);
             }
 

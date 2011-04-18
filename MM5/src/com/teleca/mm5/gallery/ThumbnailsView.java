@@ -22,6 +22,8 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
     private ImageAdapter mImageAdapter;
     private static final String TAG = "ThumbnailsView";
     private Animation mSelectionAnimation = null;
+    private Animation mOptionBarShow = null;
+    private Animation mOptionBarHide = null;
     private Integer nFocusIndex = -1;
 
     @Override
@@ -36,24 +38,33 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
         try {
             getMainView().setAdapter(mImageAdapter);
             getMainView().setSelector(R.drawable.thumbnail_selector);
+
+            // VIEW option handling
             Button mViewButton = (Button)findViewById(R.id.viewButton);
             mViewButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                   Intent launchFullScreen = new Intent(getGalleryViewContext(), FullScreenView.class);
-                  startActivity( launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", nFocusIndex) );
+                  if(nFocusIndex >= 0) {
+                      startActivity( launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", nFocusIndex) );
+                  } else {
+                      startActivity( launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", 0) );
+                  }
                 }
             });
 
-            Button mOptionsButton = (Button)findViewById(R.id.optionsButton);
-            mOptionsButton.setOnClickListener(new View.OnClickListener() {
+            // DELETE option handling
+            Button mDeleteButton = (Button)findViewById(R.id.deleteButton);
+            mDeleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    openOptionsMenu();
+                    // TODO: handle delete here
                 }
             });
 
             mSelectionAnimation = AnimationUtils.loadAnimation(this, R.anim.thumbnail_selection);
+            mOptionBarShow = AnimationUtils.loadAnimation(this, R.anim.thumbnail_optionbar_show);
+            mOptionBarHide = AnimationUtils.loadAnimation(this, R.anim.thumbnail_optionbar_hide);
 
             // set empty tests for text view - name and counter
             mTextView = (TextView)findViewById(R.id.thumbnailItemDisplayName);
@@ -78,13 +89,11 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
         mTextView = (TextView)findViewById(R.id.thumbnailCounter);
         mTextView.setText(String.format("%d/%d", mSelectItemId + 1, mImageAdapter.getCount()));
 
-        if( null != selectedView && selectedView instanceof ImageView)
-        {
+        if( null != selectedView && selectedView instanceof ImageView) {
             imageView = (ImageView)selectedView;
         }
 
         if( null != imageView ) {
-
             mResizeImage = (ImageView) mImageAdapter.getView(mSelectItemId,
                                                              findViewById(R.id.imageView1),
                                                              null);
@@ -106,6 +115,15 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
             if(null != mSelectionAnimation) {
                 mSelectionAnimation.cancel();
                 mResizeImage.startAnimation(mSelectionAnimation);
+            }
+
+            // if focus already presented - there's no need to show up options bar
+            if( nFocusIndex < 0 ) {
+                // show options bar
+                View optionsBar = findViewById(R.id.thimbnail_optionbar);
+
+                optionsBar.startAnimation(mOptionBarShow);
+                optionsBar.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -136,7 +154,12 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
 
         case R.id.FULLSCREEN_ID:
             Intent launchFullScreen = new Intent(getGalleryViewContext(), FullScreenView.class);
-            startActivity(launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", nFocusIndex));
+
+            if(nFocusIndex >= 0) {
+                startActivity(launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", nFocusIndex));
+            } else {
+                startActivity(launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", 0));
+            }
             retVal = true;
             break;
 
@@ -164,23 +187,21 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
 
                 @Override
                 public void onNothingSelected(AdapterView<?> arg0) {
-
+                    // nothing to do here
                 }
             });
 
             getMainView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
                 @Override
                 public void onItemClick(AdapterView<?> arg0, View view,
                                         int mSelectItemId, long arg3) {
-
                     // if the same image has been selected again, open fullscreen view
                     if( nFocusIndex == mSelectItemId ) {
                         Intent launchFullScreen = new Intent(getGalleryViewContext(), FullScreenView.class);
                         startActivity(launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", nFocusIndex));
                     } else {
-                        nFocusIndex = mSelectItemId;
                         update(mSelectItemId, view);
+                        nFocusIndex = mSelectItemId;
                     }
                 }
             });
@@ -192,11 +213,19 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
                     // no need to handle scroll state change
                     ImageView mResizeImage = (ImageView)findViewById(R.id.imageView1);
 
-                    if( null != mResizeImage )
-                    {
+                    if( null != mResizeImage ) {
                         mResizeImage.setImageBitmap(null);
-                        // reset focus index also
-                        nFocusIndex = -1;
+
+                        if(nFocusIndex >= 0) {
+                            // reset focus index also
+                            nFocusIndex = -1;
+
+                            // play animation to hide options bar
+                            View optionBar = findViewById(R.id.thimbnail_optionbar);
+
+                            optionBar.startAnimation(mOptionBarHide);
+                            optionBar.setVisibility(View.INVISIBLE);
+                        }
                     }
                 }
 

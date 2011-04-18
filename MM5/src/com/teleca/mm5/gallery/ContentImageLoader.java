@@ -48,22 +48,20 @@ public class ContentImageLoader implements Runnable {
         this.setnItemId(nItemId);
 
         decodeOpt = new BitmapFactory.Options();
-        if( nRequiredWidth > 0 && nRequiredHeight > 0 ) {
-            decodeOpt.outHeight = nRequiredHeight;
-            decodeOpt.outWidth = nRequiredWidth;
 
+        if( nRequiredWidth > 0 && nRequiredHeight > 0 ) {
             if(!bKeepQuality) {
-                decodeOpt.inSampleSize = 4;
+                decodeOpt.inSampleSize = 6;
             } else {
-                decodeOpt.inSampleSize = 2;
+                decodeOpt.inSampleSize = 4;
             }
 
-            // use 96 DPI as common for displays
+            // use 72 DPI as common for displays
             decodeOpt.inDensity = 72;
             decodeOpt.inPurgeable = true;
-            //decodeOpt.inScreenDensity = densityDpi;
             decodeOpt.inTargetDensity = 72;
             decodeOpt.inScaled = true;
+            decodeOpt.inInputShareable = true;
         }
     }
 
@@ -75,22 +73,23 @@ public class ContentImageLoader implements Runnable {
             Integer srcWidth = 0;
             Integer srcHeight = 0;
             String contentPath = null;
+            Integer nSampleRatio = 0;
 
             callbackMsg.obj = this;
             callbackMsg.setTarget(callerHdlr);
 
-            if(null != imagesCursor)
-            {
+            if(null != imagesCursor) {
                 try {
                     imagesCursor.moveToPosition(nItemId);
                     contentPath = imagesCursor.getString(imagesCursor.getColumnIndex(MediaStore.Images.Media.DATA));
 
-                    if(null != contentPath)
-                    {
+                    if(null != contentPath) {
                         // try to make GC every time before we're decoding new image
                         System.gc();
+                        decodeOpt.inJustDecodeBounds = true;
                         srcBitmap = BitmapFactory.decodeFile( contentPath,
                                                               decodeOpt );
+                        decodeOpt.inJustDecodeBounds = false;
                     }
                 } catch (Exception e) {
                     Log.e(TAG,
@@ -98,44 +97,76 @@ public class ContentImageLoader implements Runnable {
                 }
             }
 
-            if( null != srcBitmap ) {
-                srcWidth = srcBitmap.getWidth();
-                srcHeight = srcBitmap.getHeight();
+            srcWidth = decodeOpt.outWidth;
+            srcHeight = decodeOpt.outHeight;
 
-                /* here we need to compute out width and height properly.
-                 * Treat <= values as invalid and don't resize to it.
-                 */
-                if( ( this.nRequiredWidth > 0 && this.nRequiredHeight > 0 ) &&
-                    ( srcWidth > this.nRequiredWidth || srcHeight > this.nRequiredHeight ) ) {
-                    // calculate out image dimensions keep aspect ratio
-                    Double ratio = (double)srcHeight / (double)srcWidth;
+            /* need to determine if original width and height lower
+             *  than requested and decode small images in better quality
+             */
+            if(srcWidth <= this.nRequiredWidth &&
+               srcHeight <= this.nRequiredHeight &&
+               decodeOpt.inSampleSize > 2) {
+                nSampleRatio = ( this.nRequiredWidth * this.nRequiredHeight ) / ( srcWidth * srcHeight );
 
-                    if( this.nRequiredWidth <= srcWidth ) {
-                        srcWidth = this.nRequiredWidth;
-                        srcHeight = (int)(srcWidth * ratio);
-                    }
-
-                    if( this.nRequiredHeight <= srcHeight ) {
-                        srcHeight = this.nRequiredHeight;
-                        srcWidth = (int)( srcHeight / ratio );
-                    }
-
-                    // verify if some of image dimensions become 0
-                    if( srcWidth <= 0 ) {
-                        srcWidth = 1;
-                    }
-
-                    if( srcHeight <= 0 ) {
-                        srcHeight = 1;
-                    }
-
-                    bm = Bitmap.createScaledBitmap(srcBitmap,
-                                                   srcWidth,
-                                                   srcHeight,
-                                                   true);
+                if(nSampleRatio >= 2) {
+                    decodeOpt.inSampleSize = 2;
                 } else {
-                    bm = Bitmap.createBitmap(srcBitmap);
+                    decodeOpt.inSampleSize = 4;
                 }
+            } else {
+                nSampleRatio = ( srcWidth * srcHeight ) / ( this.nRequiredWidth * this.nRequiredHeight );
+
+                if( nSampleRatio <= 2 ) {
+                    decodeOpt.inSampleSize = 6;
+                } else {
+                    decodeOpt.inSampleSize = 8;
+                }
+            }
+
+            try {
+                System.gc();
+                srcBitmap = BitmapFactory.decodeFile( contentPath,
+                                                      decodeOpt );
+            } catch (Exception e) {
+                Log.e(TAG,
+                      "run(): " + e.getClass() + " thrown " + e.getMessage());
+            }
+
+            /* here we need to compute out width and height properly.
+             * Treat <= values as invalid and don't resize to it.
+             */
+            if( ( this.nRequiredWidth > 0 && this.nRequiredHeight > 0 ) &&
+                ( srcWidth > this.nRequiredWidth || srcHeight > this.nRequiredHeight ) ) {
+                // calculate out image dimensions keep aspect ratio
+                Double ratio = (double)srcHeight / (double)srcWidth;
+
+                if( this.nRequiredWidth <= srcWidth ) {
+                    srcWidth = this.nRequiredWidth;
+                    srcHeight = (int)(srcWidth * ratio);
+                }
+
+                if( this.nRequiredHeight <= srcHeight ) {
+                    srcHeight = this.nRequiredHeight;
+                    srcWidth = (int)( srcHeight / ratio );
+                }
+
+                // verify if some of image dimensions become 0
+                if( srcWidth <= 0 ) {
+                    srcWidth = 1;
+                }
+
+                if( srcHeight <= 0 ) {
+                    srcHeight = 1;
+                }
+
+                bm = Bitmap.createScaledBitmap(srcBitmap,
+                                               srcWidth,
+                                               srcHeight,
+                                               false);
+                srcBitmap.recycle();
+                srcBitmap = null;
+            } else {
+                bm = srcBitmap;
             }
 
             callbackMsg.sendToTarget();
