@@ -158,6 +158,8 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
 
                 if(null != itemTag) {
                     contentAdapter.setnPlayIndex(itemTag.getIndex());
+                    // Also expand playing item
+                    contentAdapter.setnFocus(itemTag.getIndex());
                     player.setDataSource(itemTag.getContentPath());
                     player.prepare();
                     player.start();

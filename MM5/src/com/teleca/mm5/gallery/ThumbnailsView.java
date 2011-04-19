@@ -3,6 +3,8 @@ package com.teleca.mm5.gallery;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -13,18 +15,16 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ThumbnailsView extends GalleryView<GridView> implements GalleryViewInterface {
+public class ThumbnailsView extends GalleryView<GridView> implements GalleryViewInterface, Handler.Callback {
     private ImageAdapter mImageAdapter;
     private static final String TAG = "ThumbnailsView";
     private Animation mSelectionAnimation = null;
-    private Animation mOptionBarShow = null;
-    private Animation mOptionBarHide = null;
     private Integer nFocusIndex = -1;
+    private GalleryOptionsBar optionsBar = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,32 +39,7 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
             getMainView().setAdapter(mImageAdapter);
             getMainView().setSelector(R.drawable.thumbnail_selector);
 
-            // VIEW option handling
-            Button mViewButton = (Button)findViewById(R.id.viewButton);
-            mViewButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                  Intent launchFullScreen = new Intent(getGalleryViewContext(), FullScreenView.class);
-                  if(nFocusIndex >= 0) {
-                      startActivity( launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", nFocusIndex) );
-                  } else {
-                      startActivity( launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", 0) );
-                  }
-                }
-            });
-
-            // DELETE option handling
-            Button mDeleteButton = (Button)findViewById(R.id.deleteButton);
-            mDeleteButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // TODO: handle delete here
-                }
-            });
-
             mSelectionAnimation = AnimationUtils.loadAnimation(this, R.anim.thumbnail_selection);
-            mOptionBarShow = AnimationUtils.loadAnimation(this, R.anim.thumbnail_optionbar_show);
-            mOptionBarHide = AnimationUtils.loadAnimation(this, R.anim.thumbnail_optionbar_hide);
 
             // set empty tests for text view - name and counter
             mTextView = (TextView)findViewById(R.id.thumbnailItemDisplayName);
@@ -75,6 +50,10 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
         } catch (Exception e) {
             Log.e(TAG, "onCreate(): " + e.getClass() + " thrown " + e.getMessage());
         }
+
+        // setup options bar
+        optionsBar = new GalleryOptionsBar(this, R.id.thimbnail_optionbar);
+        optionsBar.setOptionsHandler(this);
     }
 
     private void update(int mSelectItemId, View selectedView){
@@ -120,10 +99,7 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
             // if focus already presented - there's no need to show up options bar
             if( nFocusIndex < 0 ) {
                 // show options bar
-                View optionsBar = findViewById(R.id.thimbnail_optionbar);
-
-                optionsBar.startAnimation(mOptionBarShow);
-                optionsBar.setVisibility(View.VISIBLE);
+                optionsBar.showOptionBar();
             }
         }
     }
@@ -220,10 +196,7 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
                             nFocusIndex = -1;
 
                             // play animation to hide options bar
-                            View optionBar = findViewById(R.id.thimbnail_optionbar);
-
-                            optionBar.startAnimation(mOptionBarHide);
-                            optionBar.setVisibility(View.INVISIBLE);
+                            optionsBar.hideOptionBar();
                         }
                     }
                 }
@@ -234,6 +207,38 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
                 }
             });
         }
+    }
+
+    /**
+     * This is Option handler
+     */
+    @Override
+    public boolean handleMessage(Message msg) {
+        boolean retVal = false;
+
+        switch(msg.arg1) {
+        // VIEW option
+        case R.id.viewButton:
+            Intent launchFullScreen = new Intent(getGalleryViewContext(), FullScreenView.class);
+            if(nFocusIndex >= 0) {
+                startActivity( launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", nFocusIndex) );
+            } else {
+                startActivity( launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", 0) );
+            }
+            retVal = true;
+            break;
+
+        // DELETE option
+        case R.id.deleteButton:
+            // TODO: handle delete here
+            retVal = true;
+            break;
+
+        default:
+            break;
+        }
+
+        return retVal;
     }
 }
 
