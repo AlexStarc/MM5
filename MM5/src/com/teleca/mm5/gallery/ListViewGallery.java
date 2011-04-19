@@ -34,7 +34,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 
@@ -42,12 +44,12 @@ import android.widget.ListView;
  * @author negr
  *
  */
-public class ListViewGallery extends GalleryView<ListView> implements GalleryViewInterface, OnClickListener {
+public class ListViewGallery extends GalleryView<ListView> implements GalleryViewInterface, OnClickListener, MediaPlayer.OnCompletionListener {
     private static final String TAG = "ListViewGallery";
     private Integer nFocusIndex = 0;
-    private View    playView = null;
     private ListViewCursorAdapter contentAdapter = null;
     private MediaPlayer player = null;
+    private static final Integer GALLERY_INVALID_INDEX = -1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -83,6 +85,35 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
                 }
             });
 
+            getMainView().setOnItemClickListener( new OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent,
+                                        View view,
+                                        int position,
+                                        long id) {
+                    nFocusIndex = position;
+
+                    contentAdapter.setnFocus(nFocusIndex);
+                }
+            });
+
+            getMainView().setOnScrollListener(new AbsListView.OnScrollListener() {
+
+                @Override
+                public void onScrollStateChanged(AbsListView view, int scrollState) {
+                    if(nFocusIndex >= 0) {
+                        // reset focus
+                        nFocusIndex = GALLERY_INVALID_INDEX;
+                        contentAdapter.setnFocus(nFocusIndex);
+                    }
+                }
+
+                @Override
+                public void onScroll(AbsListView view, int firstVisibleItem,
+                                     int visibleItemCount, int totalItemCount) {
+                }
+            });
+
             // create adapter based on received cursor and attach it to list view
             contentAdapter = new ListViewCursorAdapter(getApplicationContext(),
                                                        getContentCursor(),
@@ -93,12 +124,16 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
         }
     }
 
+    /**
+     * Listener for click event on Play/Stop button on list items
+     */
     @Override
     public void onClick(View v) {
         try {
             // Listener for play click
             View listItemView = (View)v.getParent();
             Button playButton = null;
+            View playView = getMainView().getChildAt(contentAdapter.getnPlayIndex());
 
             if( playView != null ) {
                 playButton = (Button)playView.findViewById(R.id.listview_item_play);
@@ -109,19 +144,28 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
             player.reset();
 
             if(null != playView &&
-               playView.equals(listItemView))
-            {
+               playView.equals(listItemView)) {
                 playView = null;
+                contentAdapter.setnPlayIndex(GALLERY_INVALID_INDEX);
             } else {
                 GalleryContentItem itemTag = (GalleryContentItem)listItemView.getTag();
 
-                player.setDataSource(itemTag.getContentPath());
-                player.prepare();
-                player.start();
-                playView = listItemView;
-                playButton = (Button)listItemView.findViewById(R.id.listview_item_play);
+                if(itemTag == null) {
+                    // somehow we haven't received tag, so, retrieve index and obtain tag
+                    contentAdapter.bindView(listItemView, getApplicationContext(), getContentCursor());
+                    itemTag = (GalleryContentItem)listItemView.getTag();
+                }
 
-                playButton.setBackgroundResource(R.drawable.listview_item_stop_button);
+                if(null != itemTag) {
+                    contentAdapter.setnPlayIndex(itemTag.getIndex());
+                    player.setDataSource(itemTag.getContentPath());
+                    player.prepare();
+                    player.start();
+                    playView = listItemView;
+                    playButton = (Button)listItemView.findViewById(R.id.listview_item_play);
+
+                    playButton.setBackgroundResource(R.drawable.listview_item_stop_button);
+                }
             }
         } catch(Exception e) {
             Log.e(TAG, "onClick(): " + e.getClass() + " thrown " + e.getMessage());
@@ -131,14 +175,21 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
     @Override
     protected void onPause() {
         player.reset();
-        playView = null;
+        contentAdapter.setnPlayIndex(GALLERY_INVALID_INDEX);
         super.onPause();
     }
 
     @Override
     protected void onStop() {
         player.reset();
-        playView = null;
+        contentAdapter.setnPlayIndex(GALLERY_INVALID_INDEX);
         super.onStop();
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer arg0) {
+        // we need to handle this play on both - selection and underlying item
+        this.onClick(getMainView().getChildAt(contentAdapter.getnPlayIndex()).findViewById(R.id.listview_item_play));
+        contentAdapter.setnPlayIndex(GALLERY_INVALID_INDEX);
     }
 }

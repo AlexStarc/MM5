@@ -210,7 +210,6 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
 
                 @Override
                 public void onScrollStateChanged(AbsListView view, int scrollState) {
-                    // no need to handle scroll state change
                     ImageView mResizeImage = (ImageView)findViewById(R.id.imageView1);
 
                     if( null != mResizeImage ) {

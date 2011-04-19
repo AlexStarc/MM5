@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/listview_selection_bg">
+    <Button android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="10dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/listview_item_button"
+            android:focusable="false"
+            android:id="@+id/listview_item_play">
+    </Button>
+    <TextView android:layout_alignParentLeft="true"
+              android:layout_alignParentTop="true"
+              android:layout_toLeftOf="@id/listview_item_play"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_margin="5dp"
+              android:id="@+id/listview_item_text"
+              android:layout_centerVertical="true"
+              android:textSize="30dp">
+    </TextView>
+    <TextView android:layout_alignParentLeft="true"
+              android:layout_below="@id/listview_item_text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="5dp"
+              android:textAppearance="?android:attr/textAppearanceMedium"
+              android:text="ARTIST: "
+              android:id="@+id/listview_item_artist">
+    </TextView>
+    <TextView android:layout_alignParentLeft="true"
+              android:layout_below="@id/listview_item_artist"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="5dp"
+              android:textAppearance="?android:attr/textAppearanceMedium"
+              android:text="ALBUM: "
+              android:id="@+id/listview_item_album">
+    </TextView>
+    <TextView android:layout_alignParentLeft="true"
+              android:layout_below="@id/listview_item_album"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="5dp"
+              android:textAppearance="?android:attr/textAppearanceMedium"
+              android:text="DURATIION: "
+              android:id="@+id/listview_item_duration">
+    </TextView>
+</RelativeLayout>
