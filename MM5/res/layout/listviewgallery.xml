@@ -9,4 +9,28 @@
         android:layout_height="match_parent"
         android:id="@+id/listview_gallery">
     </ListView>
+
+    <!-- OptionsBar section -->
+    <RelativeLayout
+        android:id="@+id/listview_optionbar"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:background="@drawable/bottombar"
+        android:layout_alignParentBottom="true"
+        android:visibility="invisible">
+        <Button
+            android:background="@drawable/optionbar_info_button"
+            android:layout_alignParentLeft="true"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:id="@+id/infoButton">
+        </Button>
+        <Button
+            android:background="@drawable/optionbar_delete_button"
+            android:layout_alignParentRight="true"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:id="@+id/deleteButton">
+        </Button>
+    </RelativeLayout>
 </RelativeLayout>

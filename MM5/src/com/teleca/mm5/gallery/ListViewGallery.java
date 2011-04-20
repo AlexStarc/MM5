@@ -29,6 +29,8 @@ package com.teleca.mm5.gallery;
 
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -44,12 +46,13 @@ import android.widget.ListView;
  * @author negr
  *
  */
-public class ListViewGallery extends GalleryView<ListView> implements GalleryViewInterface, OnClickListener, MediaPlayer.OnCompletionListener {
+public class ListViewGallery extends GalleryView<ListView> implements GalleryViewInterface, OnClickListener, MediaPlayer.OnCompletionListener, Handler.Callback {
     private static final String TAG = "ListViewGallery";
     private Integer nFocusIndex = 0;
     private ListViewCursorAdapter contentAdapter = null;
     private MediaPlayer player = null;
     private static final Integer GALLERY_INVALID_INDEX = -1;
+    private GalleryOptionsBar optionsBar = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,6 +62,11 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
 
         // create MediaPlayer for playing of selected sound
         player = new MediaPlayer();
+
+        nFocusIndex = GALLERY_INVALID_INDEX;
+        // setup options bar
+        optionsBar = new GalleryOptionsBar(this, R.id.listview_optionbar);
+        optionsBar.setOptionsHandler(this);
     }
 
     @Override
@@ -91,9 +99,14 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
                                         View view,
                                         int position,
                                         long id) {
-                    nFocusIndex = position;
+                    contentAdapter.setnFocus(position);
 
-                    contentAdapter.setnFocus(nFocusIndex);
+                    if( nFocusIndex < 0 ) {
+                        // show options bar
+                        optionsBar.showOptionBar();
+                    }
+
+                    nFocusIndex = position;
                 }
             });
 
@@ -105,6 +118,7 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
                         // reset focus
                         nFocusIndex = GALLERY_INVALID_INDEX;
                         contentAdapter.setnFocus(nFocusIndex);
+                        optionsBar.hideOptionBar();
                     }
                 }
 
@@ -193,5 +207,11 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
         // we need to handle this play on both - selection and underlying item
         this.onClick(getMainView().getChildAt(contentAdapter.getnPlayIndex()).findViewById(R.id.listview_item_play));
         contentAdapter.setnPlayIndex(GALLERY_INVALID_INDEX);
+    }
+
+    @Override
+    public boolean handleMessage(Message arg0) {
+        // TODO Auto-generated method stub
+        return false;
     }
 }
