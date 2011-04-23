@@ -20,6 +20,7 @@
  * http://sam.zoy.org/wtfpl/COPYING for more details. */
 package com.teleca.mm5.gallery;
 
+import android.app.Activity;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -36,7 +37,6 @@ import android.widget.Button;
  */
 public class GalleryOptionsBar {
     private static final String TAG = "GalleryOptionsBar";
-    private GalleryView<?> parent = null;
     private Animation mOptionBarShow = null;
     private Animation mOptionBarHide = null;
     private ViewGroup optionsBarView = null;
@@ -49,10 +49,8 @@ public class GalleryOptionsBar {
      * @param parent - parent Gallery view of this options bar
      * @param optionBarViewId - options bar view id inside parent GalleryView
      */
-    public GalleryOptionsBar(GalleryView<?> parent, Integer optionBarViewId) {
+    public GalleryOptionsBar(Activity parent, Integer optionBarViewId) {
         try {
-            this.parent = parent;
-
             mOptionBarShow = AnimationUtils.loadAnimation(parent.getApplicationContext(), R.anim.thumbnail_optionbar_show);
             mOptionBarHide = AnimationUtils.loadAnimation(parent.getApplicationContext(), R.anim.thumbnail_optionbar_hide);
 

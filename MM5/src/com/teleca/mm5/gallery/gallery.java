@@ -54,7 +54,7 @@ public class gallery extends GalleryView<ListView> implements OnItemClickListene
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.i( TAG, "Started" );
+        Log.i( TAG, "created" );
 
         setContentType(GalleryViewType.GALLERY_MAINMENU);
         super.onCreate(savedInstanceState);

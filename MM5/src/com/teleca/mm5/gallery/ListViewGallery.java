@@ -1,23 +1,25 @@
-/*            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-                    Version 2, December 2004
-
- Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
-
- Everyone is permitted to copy and distribute verbatim or modified
- copies of this license document, and changing it is allowed as long
- as the name is changed.
-
-            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
-
-  0. You just DO WHAT THE FUCK YOU WANT TO.
-*/
-
-/* This program is free software. It comes without any warranty, to
- * the extent permitted by applicable law. You can redistribute it
- * and/or modify it under the terms of the Do What The Fuck You Want
- * To Public License, Version 2, as published by Sam Hocevar. See
- * http://sam.zoy.org/wtfpl/COPYING for more details. */
+/*
+ * DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+ *                     Version 2, December 2004
+ *
+ *  Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
+ *
+ *
+ *  Everyone is permitted to copy and distribute verbatim or modified
+ *  copies of this license document, and changing it is allowed as long
+ *  as the name is changed.
+ *
+ *             DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+ *    TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+ *
+ *   0. You just DO WHAT THE FUCK YOU WANT TO.
+ *
+ *  This program is free software. It comes without any warranty, to
+ *  the extent permitted by applicable law. You can redistribute it
+ *  and/or modify it under the terms of the Do What The Fuck You Want
+ *  To Public License, Version 2, as published by Sam Hocevar. See
+ * http://sam.zoy.org/wtfpl/COPYING for more details.
+ */
 
 /**
  * @author AlexStarc
@@ -27,7 +29,6 @@
  */
 package com.teleca.mm5.gallery;
 
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -42,17 +43,17 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 
+import java.io.IOException;
+
 /**
- * @author negr
+ * @author AlexStarc
  *
  */
-public class ListViewGallery extends GalleryView<ListView> implements GalleryViewInterface, OnClickListener, MediaPlayer.OnCompletionListener, Handler.Callback {
+public class ListViewGallery extends GalleryView<ListView> implements GalleryViewInterface, OnClickListener, Handler.Callback {
     private static final String TAG = "ListViewGallery";
     private Integer nFocusIndex = 0;
     private ListViewCursorAdapter contentAdapter = null;
-    private MediaPlayer player = null;
-    private static final Integer GALLERY_INVALID_INDEX = -1;
-    private GalleryOptionsBar optionsBar = null;
+    private GalleryOptionsBar mOptionsBar = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -60,13 +61,10 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
         setContentType(GalleryViewType.GALLERY_LIST);
         super.onCreate(savedInstanceState);
 
-        // create MediaPlayer for playing of selected sound
-        player = new MediaPlayer();
-
-        nFocusIndex = GALLERY_INVALID_INDEX;
+        nFocusIndex = CGalleryConstants.GALLERY_INVALID_INDEX.value();
         // setup options bar
-        optionsBar = new GalleryOptionsBar(this, R.id.listview_optionbar);
-        optionsBar.setOptionsHandler(this);
+        mOptionsBar = new GalleryOptionsBar(this, R.id.listview_optionbar);
+        mOptionsBar.setOptionsHandler(this);
     }
 
     @Override
@@ -99,14 +97,15 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
                                         View view,
                                         int position,
                                         long id) {
-                    contentAdapter.setnFocus(position);
+                    if(nFocusIndex != position) {
+                        contentAdapter.setNFocus(position);
+                        nFocusIndex = position;
+                    }
 
                     if( nFocusIndex < 0 ) {
                         // show options bar
-                        optionsBar.showOptionBar();
+                        mOptionsBar.showOptionBar();
                     }
-
-                    nFocusIndex = position;
                 }
             });
 
@@ -116,9 +115,9 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
                 public void onScrollStateChanged(AbsListView view, int scrollState) {
                     if(nFocusIndex >= 0) {
                         // reset focus
-                        nFocusIndex = GALLERY_INVALID_INDEX;
-                        contentAdapter.setnFocus(nFocusIndex);
-                        optionsBar.hideOptionBar();
+                        nFocusIndex = CGalleryConstants.GALLERY_INVALID_INDEX.value();
+                        contentAdapter.setNFocus(nFocusIndex);
+                        mOptionsBar.hideOptionBar();
                     }
                 }
 
@@ -131,8 +130,8 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
             // create adapter based on received cursor and attach it to list view
             contentAdapter = new ListViewCursorAdapter(getApplicationContext(),
                                                        getContentCursor(),
-                                                       false,
-                                                       R.layout.listviewgallery_item);
+                                                       false
+            );
             contentAdapter.setPlayButtonListener(this);
             getMainView().setAdapter(contentAdapter);
         }
@@ -146,8 +145,16 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
         try {
             // Listener for play click
             View listItemView = (View)v.getParent();
-            Button playButton = null;
-            View playView = getMainView().getChildAt(contentAdapter.getnPlayIndex());
+            Button playButton;
+            View playView = getMainView().getChildAt(contentAdapter.getNPlayIndex());
+
+            GalleryContentItem itemTag = (GalleryContentItem)listItemView.getTag();
+
+            if(itemTag == null) {
+                // somehow we haven't received tag, so, retrieve index and obtain tag
+                contentAdapter.bindView(listItemView, getApplicationContext(), getContentCursor());
+                itemTag = (GalleryContentItem)listItemView.getTag();
+            }
 
             if( playView != null ) {
                 playButton = (Button)playView.findViewById(R.id.listview_item_play);
@@ -155,32 +162,22 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
                 playButton.setBackgroundResource(R.drawable.listview_item_button);
             }
 
-            player.reset();
-
             if(null != playView &&
-               playView.equals(listItemView)) {
-                playView = null;
-                contentAdapter.setnPlayIndex(GALLERY_INVALID_INDEX);
+               contentAdapter.getNPlayIndex().equals(itemTag.getIndex())) {
+                contentAdapter.setNPlayIndex(CGalleryConstants.GALLERY_INVALID_INDEX.value(), null);
             } else {
-                GalleryContentItem itemTag = (GalleryContentItem)listItemView.getTag();
-
-                if(itemTag == null) {
-                    // somehow we haven't received tag, so, retrieve index and obtain tag
-                    contentAdapter.bindView(listItemView, getApplicationContext(), getContentCursor());
-                    itemTag = (GalleryContentItem)listItemView.getTag();
-                }
-
                 if(null != itemTag) {
-                    contentAdapter.setnPlayIndex(itemTag.getIndex());
-                    // Also expand playing item
-                    contentAdapter.setnFocus(itemTag.getIndex());
-                    player.setDataSource(itemTag.getContentPath());
-                    player.prepare();
-                    player.start();
-                    playView = listItemView;
                     playButton = (Button)listItemView.findViewById(R.id.listview_item_play);
 
                     playButton.setBackgroundResource(R.drawable.listview_item_stop_button);
+
+                    // Also focus playing item if its not already expanded
+                    if(!itemTag.getIndex().equals(contentAdapter.getNFocus())) {
+                        contentAdapter.setNFocus(itemTag.getIndex());
+                        nFocusIndex = itemTag.getIndex();
+                    }
+
+                    contentAdapter.setNPlayIndex(itemTag.getIndex(), listItemView);
                 }
             }
         } catch(Exception e) {
@@ -190,23 +187,22 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
 
     @Override
     protected void onPause() {
-        player.reset();
-        contentAdapter.setnPlayIndex(GALLERY_INVALID_INDEX);
+        try {
+            contentAdapter.setNPlayIndex(CGalleryConstants.GALLERY_INVALID_INDEX.value(), null);
+        } catch (IOException e) {
+            Log.e(TAG, "onPause(): " + e.getClass() + " thrown " + e.getMessage());
+        }
         super.onPause();
     }
 
     @Override
     protected void onStop() {
-        player.reset();
-        contentAdapter.setnPlayIndex(GALLERY_INVALID_INDEX);
+        try {
+            contentAdapter.setNPlayIndex(CGalleryConstants.GALLERY_INVALID_INDEX.value(), null);
+        } catch (IOException e) {
+            Log.e(TAG, "onStop(): " + e.getClass() + " thrown " + e.getMessage());
+        }
         super.onStop();
-    }
-
-    @Override
-    public void onCompletion(MediaPlayer arg0) {
-        // we need to handle this play on both - selection and underlying item
-        this.onClick(getMainView().getChildAt(contentAdapter.getnPlayIndex()).findViewById(R.id.listview_item_play));
-        contentAdapter.setnPlayIndex(GALLERY_INVALID_INDEX);
     }
 
     @Override

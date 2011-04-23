@@ -20,7 +20,6 @@
               android:layout_height="wrap_content"
               android:layout_margin="5dp"
               android:id="@+id/listview_item_text"
-              android:layout_centerVertical="true"
               android:textSize="30dp">
     </TextView>
     <TextView android:layout_alignParentLeft="true"
@@ -50,4 +49,16 @@
               android:text="DURATIION: "
               android:id="@+id/listview_item_duration">
     </TextView>
+
+    <include android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_margin="5dp"
+             android:layout_alignParentRight="true"
+             android:layout_alignParentBottom="true"
+             android:id="@+id/listview_play_progressbar"
+             android:visibility="invisible"
+             layout="@layout/play_progressbar">
+    </include>
+
+
 </RelativeLayout>

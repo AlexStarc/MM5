@@ -22,7 +22,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 /**
- * @author astarche
+ * @author AlexStarc
  *
  */
 public class FullScreenView extends GalleryView<ImageView> implements GalleryViewInterface, Handler.Callback, View.OnClickListener, Animation.AnimationListener {
