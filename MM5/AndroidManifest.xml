@@ -31,5 +31,9 @@
                   android:activityOpenEnterAnimation="@android:style/Animation.Translucent"
                   android:activityCloseExitAnimation="@android:style/Animation.Translucent">
         </activity>
-</application>
+        <activity android:name="DetailsView"
+                  android:activityOpenEnterAnimation="@android:style/Animation.Translucent"
+                  android:activityCloseExitAnimation="@android:style/Animation.Translucent">
+        </activity>
+    </application>
 </manifest>

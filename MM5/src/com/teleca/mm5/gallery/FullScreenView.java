@@ -22,7 +22,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 /**
- * @author AlexStarc
+ * @author AlexStarc (sandrstar at hotmail dot com)
  *
  */
 public class FullScreenView extends GalleryView<ImageView> implements GalleryViewInterface, Handler.Callback, View.OnClickListener, Animation.AnimationListener {
@@ -42,6 +42,8 @@ public class FullScreenView extends GalleryView<ImageView> implements GalleryVie
     private Bitmap nextBitmap = null;
     private Boolean bMovingforward = true;
     private DisplayMetrics metrics = null;
+    private ProgressBar mProgressBar = null;
+    ImageView nextImageView = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -77,25 +79,33 @@ public class FullScreenView extends GalleryView<ImageView> implements GalleryVie
         prevImgAnimation = AnimationUtils.loadAnimation(this, R.anim.fullscreenview_previmg);
         prevImgAnimation.setAnimationListener(this);
         prevImgRemoveAnimation = AnimationUtils.loadAnimation(this, R.anim.fullscreenview_previmg_remove);
+
+        mProgressBar = (ProgressBar)findViewById(R.id.progress_large);
+        nextImageView = (ImageView)findViewById(R.id.fullscrImageViewNext);
     }
 
     @Override
     public void finishedWorkExecution(GalleryWorkTaskResult processingResult) {
+
         // Try to load image from the cursor using the index
         if(null != mImgLoader) {
             mImgLoader.stop();
         }
 
-        metrics = new DisplayMetrics();
-        ((WindowManager)getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getMetrics(metrics);
-        mImgLoader = new Thread( new ContentImageLoader(getContentCursor(),
-                                                        nFocusIndex,
-                                                        new Handler(this),
-                                                        metrics.widthPixels,
-                                                        metrics.heightPixels,
-                                                        metrics.densityDpi,
-                                                        true) );
-        mImgLoader.run();
+        super.finishedWorkExecution(processingResult);
+
+        if(processingResult == GalleryWorkTaskResult.GALLERY_RESULT_FINISHED) {
+            metrics = new DisplayMetrics();
+            ((WindowManager)getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getMetrics(metrics);
+            mImgLoader = new Thread( new ContentImageLoader(getContentCursor(),
+                                                            nFocusIndex,
+                                                            new Handler(this),
+                                                            metrics.widthPixels,
+                                                            metrics.heightPixels,
+                                                            metrics.densityDpi,
+                                                            true) );
+            mImgLoader.run();
+        }
     }
 
     @Override
@@ -106,12 +116,10 @@ public class FullScreenView extends GalleryView<ImageView> implements GalleryVie
             try {
                 // put decoded image into main layout view
                 ImageView mainView = getMainView();
-                ImageView nextImageView = (ImageView)findViewById(R.id.fullscrImageViewNext);
 
                 /* here we'll create new view similar to main one in order to provide slide animation
                  * and remove original when animation ends */
-
-                ((ProgressBar)findViewById(R.id.progress_large)).setVisibility(View.GONE);
+                mProgressBar.setVisibility(View.GONE);
 
                 if(null != mainView) {
                     itemImageLoader = (ContentImageLoader) loaderMsg.obj;
@@ -188,7 +196,7 @@ public class FullScreenView extends GalleryView<ImageView> implements GalleryVie
                         }
 
                         // indicate loading
-                        ((ProgressBar)findViewById(R.id.progress_large)).setVisibility(View.VISIBLE);
+                        mProgressBar.setVisibility(View.VISIBLE);
 
                         // load next image
                         mImgLoader = new Thread( new ContentImageLoader(getContentCursor(),

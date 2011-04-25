@@ -9,6 +9,9 @@
     <string name="FullScreen">Image Full Screen</string>
     <string name="fullscreen">Image Full Screen</string>
     <string name="mainmenu_title">Select content type You want to check out</string>
+    <string name="empty_dialog">There\'s no content on the device of this type.</string>
+    <string name="error_dialog">Error occurred during content retrieving. Please, try later.</string>
+    <string name="back_button">Go Back</string>
     <string-array name="mainmenu_items">
         <item>"My Images"</item>
         <item>"My Sounds"</item>

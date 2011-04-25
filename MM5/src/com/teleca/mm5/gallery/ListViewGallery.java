@@ -29,12 +29,13 @@
  */
 package com.teleca.mm5.gallery;
 
+import java.io.IOException;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AbsListView;
@@ -42,8 +43,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ListView;
-
-import java.io.IOException;
 
 /**
  * @author AlexStarc
@@ -68,15 +67,9 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.listviewgallery_options, menu);
-        return true;
-    }
-
-    @Override
     public void finishedWorkExecution(GalleryWorkTaskResult processingResult) {
-        // store status of processing
+        super.finishedWorkExecution(processingResult);
+
         if( GalleryWorkTaskResult.GALLERY_RESULT_FINISHED == processingResult ) {
 
             getMainView().setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -97,14 +90,14 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
                                         View view,
                                         int position,
                                         long id) {
-                    if(nFocusIndex != position) {
-                        contentAdapter.setNFocus(position);
-                        nFocusIndex = position;
-                    }
-
                     if( nFocusIndex < 0 ) {
                         // show options bar
                         mOptionsBar.showOptionBar();
+                    }
+
+                    if(nFocusIndex != position) {
+                        contentAdapter.setNFocus(position);
+                        nFocusIndex = position;
                     }
                 }
             });
@@ -206,8 +199,30 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
     }
 
     @Override
-    public boolean handleMessage(Message arg0) {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean handleMessage(Message msg) {
+        Boolean retVal = false;
+
+        switch(msg.arg1) {
+        case R.id.infoButton:
+            // launch details with extras
+            Intent launchDetails = new Intent(getGalleryViewContext(), DetailsView.class);
+
+            if(nFocusIndex >= 0) {
+                launchDetails.putExtra("com.teleca.mm5.gallery.FocusIndex", nFocusIndex);
+            } else {
+                launchDetails.putExtra("com.teleca.mm5.gallery.FocusIndex", 0);
+            }
+
+            launchDetails.putExtra("com.teleca.mm5.gallery.ContentType", GalleryViewType.GALLERY_SOUND_DETAILS);
+
+            startActivity(launchDetails);
+            retVal = true;
+            break;
+
+        default:
+            break;
+        }
+
+        return retVal;
     }
 }

@@ -6,9 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -25,11 +22,12 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
     private Animation mSelectionAnimation = null;
     private Integer nFocusIndex = -1;
     private GalleryOptionsBar optionsBar = null;
+    private ImageView mResizeImage = null;
+    private TextView  mFileNameView = null;
+    private TextView  mCounterView = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        TextView mTextView = null;
-
         setContentType(GalleryViewType.GALLERY_THUMBNAILS);
         super.onCreate(savedInstanceState);
 
@@ -42,11 +40,11 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
             mSelectionAnimation = AnimationUtils.loadAnimation(this, R.anim.thumbnail_selection);
 
             // set empty tests for text view - name and counter
-            mTextView = (TextView)findViewById(R.id.thumbnailItemDisplayName);
-            mTextView.setText( " " );
+            mFileNameView = (TextView)findViewById(R.id.thumbnailItemDisplayName);
+            mFileNameView.setText( " " );
 
-            mTextView = (TextView)findViewById(R.id.thumbnailCounter);
-            mTextView.setText( " " );
+            mCounterView = (TextView)findViewById(R.id.thumbnailCounter);
+            mCounterView.setText( " " );
         } catch (Exception e) {
             Log.e(TAG, "onCreate(): " + e.getClass() + " thrown " + e.getMessage());
         }
@@ -54,19 +52,18 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
         // setup options bar
         optionsBar = new GalleryOptionsBar(this, R.id.thimbnail_optionbar);
         optionsBar.setOptionsHandler(this);
+
+        mResizeImage = (ImageView)findViewById(R.id.imageView1);
     }
 
     private void update(int mSelectItemId, View selectedView){
-        TextView mTextView = null;
         ImageView mResizeImage = null;
         ImageView imageView = null;
         Resources mRes = getResources();
 
-        mTextView = (TextView)findViewById(R.id.thumbnailItemDisplayName);
-        mTextView.setText( mImageAdapter.getNameItemId(mSelectItemId, mRes));
+        mFileNameView.setText( mImageAdapter.getNameItemId(mSelectItemId, mRes));
 
-        mTextView = (TextView)findViewById(R.id.thumbnailCounter);
-        mTextView.setText(String.format("%d/%d", mSelectItemId + 1, mImageAdapter.getCount()));
+        mCounterView.setText(String.format("%d/%d", mSelectItemId + 1, mImageAdapter.getCount()));
 
         if( null != selectedView && selectedView instanceof ImageView) {
             imageView = (ImageView)selectedView;
@@ -74,7 +71,7 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
 
         if( null != imageView ) {
             mResizeImage = (ImageView) mImageAdapter.getView(mSelectItemId,
-                                                             findViewById(R.id.imageView1),
+                                                             mResizeImage,
                                                              null);
             ViewGroup.LayoutParams zoomedImageLayoutParams = mResizeImage.getLayoutParams();
 
@@ -105,51 +102,9 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.thumbnail_options, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item){
-        boolean retVal = true;
-
-        switch (item.getItemId()) {
-        case R.id.DETAILS_ID :
-            /*!! Intent intent = new Intent(this, DetaisView.class);
-            startActivity(intent);!!*/
-            retVal = true;
-            break;
-
-        case R.id.LISTVIEW_ID:
-            /*!! Intent intent = new Intent(this, ListViewView.class);
-            startActivity(intent);!!*/
-            retVal = true;
-            break;
-
-        case R.id.FULLSCREEN_ID:
-            Intent launchFullScreen = new Intent(getGalleryViewContext(), FullScreenView.class);
-
-            if(nFocusIndex >= 0) {
-                startActivity(launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", nFocusIndex));
-            } else {
-                startActivity(launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", 0));
-            }
-            retVal = true;
-            break;
-
-        default:
-            retVal = false;
-            break;
-        }
-
-        return retVal;
-    }
-
-    @Override
     public void finishedWorkExecution(GalleryWorkTaskResult processingResult) {
-        // store status of processing
+        super.finishedWorkExecution(processingResult);
+
         if( GalleryWorkTaskResult.GALLERY_RESULT_FINISHED == processingResult ) {
 
             mImageAdapter.setContentCursor(getContentCursor());
@@ -186,8 +141,6 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
 
                 @Override
                 public void onScrollStateChanged(AbsListView view, int scrollState) {
-                    ImageView mResizeImage = (ImageView)findViewById(R.id.imageView1);
-
                     if( null != mResizeImage ) {
                         mResizeImage.setImageBitmap(null);
 
@@ -231,6 +184,22 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
         // DELETE option
         case R.id.deleteButton:
             // TODO: handle delete here
+            retVal = true;
+            break;
+
+        case R.id.infoButton:
+            // launch details with extras
+            Intent launchDetails = new Intent(getGalleryViewContext(), DetailsView.class);
+
+            if(nFocusIndex >= 0) {
+                launchDetails.putExtra("com.teleca.mm5.gallery.FocusIndex", nFocusIndex);
+            } else {
+                launchDetails.putExtra("com.teleca.mm5.gallery.FocusIndex", 0);
+            }
+
+            launchDetails.putExtra("com.teleca.mm5.gallery.ContentType", GalleryViewType.GALLERY_IMAGE_DETAILS);
+
+            startActivity(launchDetails);
             retVal = true;
             break;
 

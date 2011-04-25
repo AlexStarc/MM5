@@ -1,5 +1,5 @@
 /*
- * DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+ *            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
  *                     Version 2, December 2004
  *
  *  Everyone is permitted to copy and distribute verbatim or modified
@@ -23,10 +23,6 @@ package com.teleca.mm5.gallery;
  * This file contains constants to be use by the application like invalid index etc.
  */
 
-/**
- * @author astarche
- *
- */
 public class CGalleryConstants {
     private final Integer value;
 

@@ -3,7 +3,9 @@ package com.teleca.mm5.gallery;
 import javax.security.auth.callback.Callback;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -19,7 +21,7 @@ enum GalleryContentType {
     GALLERY_ALLTYPES
 }
 
-//enum for results of work task proccessing
+//enum for results of work task processing
 enum GalleryWorkTaskResult {
     GALLERY_RESULT_EMPTY,
     GALLERY_RESULT_FINISHED,
@@ -30,11 +32,12 @@ enum GalleryWorkTaskResult {
 /** enum for available gallery views to be used in
    methods and data which these views provides */
 enum GalleryViewType {
-    GALLERY_MAINMENU    ( R.layout.main, R.id.main_menu, GalleryContentType.GALLERY_STATIC ),
-    GALLERY_LIST        ( R.layout.listviewgallery, R.id.listview_gallery, GalleryContentType.GALLERY_AUDIO ),
-    GALLERY_THUMBNAILS  ( R.layout.thumbnails, R.id.gridView1, GalleryContentType.GALLERY_IMAGES ),
-    GALLERY_FULLSCREEN  ( R.layout.fullscreen, R.id.fullscrImageView, GalleryContentType.GALLERY_IMAGES ),
-    GALLERY_DETAILS     ( 0, 0, GalleryContentType.GALLERY_ALLTYPES );
+    GALLERY_MAINMENU      ( R.layout.main, R.id.main_menu, GalleryContentType.GALLERY_STATIC ),
+    GALLERY_LIST          ( R.layout.listviewgallery, R.id.listview_gallery, GalleryContentType.GALLERY_AUDIO ),
+    GALLERY_THUMBNAILS    ( R.layout.thumbnails, R.id.gridView1, GalleryContentType.GALLERY_IMAGES ),
+    GALLERY_FULLSCREEN    ( R.layout.fullscreen, R.id.fullscrImageView, GalleryContentType.GALLERY_IMAGES ),
+    GALLERY_IMAGE_DETAILS ( R.layout.details_image_view, 0, GalleryContentType.GALLERY_IMAGES ),
+    GALLERY_SOUND_DETAILS ( R.layout.details_sound_view, 0, GalleryContentType.GALLERY_AUDIO );
 
     private final Integer layoutId;
     private final Integer mainViewId;
@@ -209,6 +212,36 @@ public abstract class GalleryView<V extends View> extends Activity implements Ca
 
     @Override
     public void finishedWorkExecution( GalleryWorkTaskResult processingResult ) {
-        // TODO Auto-generated method stub
+        if(processingResult != GalleryWorkTaskResult.GALLERY_RESULT_FINISHED) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            DialogInterface.OnClickListener clickListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if(which == DialogInterface.BUTTON_NEUTRAL) {
+                        // close dialog by the button
+                        GalleryView.this.finish();
+                    }
+                }
+            };
+
+            switch(processingResult) {
+            case GALLERY_RESULT_EMPTY:
+                builder.setMessage(R.string.empty_dialog);
+                builder.setCancelable(true);
+                builder.setNeutralButton(R.string.back_button, clickListener);
+                // show dialog about folder empty
+                break;
+
+            case GALLERY_RESULT_ERROR:
+                //  show dialog about error
+                builder.setMessage(R.string.error_dialog);
+                builder.setCancelable(true);
+                builder.setNeutralButton(R.string.back_button, clickListener);
+                break;
+
+            default:
+                break;
+            }
+        }
     }
 }
