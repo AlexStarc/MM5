@@ -213,7 +213,7 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
                 launchDetails.putExtra("com.teleca.mm5.gallery.FocusIndex", 0);
             }
 
-            launchDetails.putExtra("com.teleca.mm5.gallery.ContentType", GalleryViewType.GALLERY_SOUND_DETAILS);
+            launchDetails.putExtra("com.teleca.mm5.gallery.ContentType", GalleryViewType.GALLERY_SOUND_DETAILS.ordinal());
 
             startActivity(launchDetails);
             retVal = true;

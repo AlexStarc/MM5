@@ -57,7 +57,6 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
     }
 
     private void update(int mSelectItemId, View selectedView){
-        ImageView mResizeImage = null;
         ImageView imageView = null;
         Resources mRes = getResources();
 
@@ -197,7 +196,7 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
                 launchDetails.putExtra("com.teleca.mm5.gallery.FocusIndex", 0);
             }
 
-            launchDetails.putExtra("com.teleca.mm5.gallery.ContentType", GalleryViewType.GALLERY_IMAGE_DETAILS);
+            launchDetails.putExtra("com.teleca.mm5.gallery.ContentType", GalleryViewType.GALLERY_IMAGE_DETAILS.ordinal());
 
             startActivity(launchDetails);
             retVal = true;

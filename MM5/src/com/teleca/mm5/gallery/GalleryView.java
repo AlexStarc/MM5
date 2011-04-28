@@ -32,12 +32,12 @@ enum GalleryWorkTaskResult {
 /** enum for available gallery views to be used in
    methods and data which these views provides */
 enum GalleryViewType {
-    GALLERY_MAINMENU      ( R.layout.main, R.id.main_menu, GalleryContentType.GALLERY_STATIC ),
-    GALLERY_LIST          ( R.layout.listviewgallery, R.id.listview_gallery, GalleryContentType.GALLERY_AUDIO ),
-    GALLERY_THUMBNAILS    ( R.layout.thumbnails, R.id.gridView1, GalleryContentType.GALLERY_IMAGES ),
-    GALLERY_FULLSCREEN    ( R.layout.fullscreen, R.id.fullscrImageView, GalleryContentType.GALLERY_IMAGES ),
-    GALLERY_IMAGE_DETAILS ( R.layout.details_image_view, 0, GalleryContentType.GALLERY_IMAGES ),
-    GALLERY_SOUND_DETAILS ( R.layout.details_sound_view, 0, GalleryContentType.GALLERY_AUDIO );
+    GALLERY_MAINMENU      ( R.layout.main,               R.id.main_menu,        GalleryContentType.GALLERY_STATIC ),
+    GALLERY_LIST          ( R.layout.listviewgallery,    R.id.listview_gallery, GalleryContentType.GALLERY_AUDIO ),
+    GALLERY_THUMBNAILS    ( R.layout.thumbnails,         R.id.gridView1,        GalleryContentType.GALLERY_IMAGES ),
+    GALLERY_FULLSCREEN    ( R.layout.fullscreen,         R.id.fullscrImageView, GalleryContentType.GALLERY_IMAGES ),
+    GALLERY_IMAGE_DETAILS ( R.layout.details_image_view, R.id.details_layout,   GalleryContentType.GALLERY_IMAGES ),
+    GALLERY_SOUND_DETAILS ( R.layout.details_sound_view, R.id.details_layout,   GalleryContentType.GALLERY_AUDIO );
 
     private final Integer layoutId;
     private final Integer mainViewId;
@@ -130,6 +130,11 @@ public abstract class GalleryView<V extends View> extends Activity implements Ca
     }
 
     @Override
+    /**
+     * Get context of this {GalleryView}
+     *
+     * @return {Context}
+     */
     public Context getGalleryViewContext() {
         return getApplicationContext();
     }

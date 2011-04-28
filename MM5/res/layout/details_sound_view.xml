@@ -1,6 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res/com.teleca.mm5.gallery"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/details_layout">
+    <TextView android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_alignParentTop="true"
+              android:layout_margin="2dp"
+              android:id="@+id/details_displayname"
+              android:textAppearance="?android:attr/textAppearanceMedium"
+              android:typeface="serif"
+              android:textSize="25dp"
+              android:maxLines="2">
+    </TextView>
+    <TextView android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_margin="2dp"
+              android:layout_marginTop="10dp"
+              android:layout_below="@id/details_displayname"
+              android:id="@+id/details_path_label"
+              android:text="@string/details_path_label"
+              android:textSize="20dp"
+              android:textStyle="bold">
+    </TextView>
+    <TextView android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="2dp"
+              android:layout_marginTop="2dp"
+              android:id="@+id/details_path"
+              android:layout_below="@id/details_displayname"
+              android:layout_toRightOf="@id/details_path_label"
+              android:textSize="20dp">
+    </TextView>
+    <com.teleca.mm5.gallery.GalleryStaticTextExView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/details_path"
+        android:layout_marginLeft="2dp"
+        android:id="@+id/rotated1"
+        app:text="i'm rotated!"
+        app:textRotation="120"
+        app:textSize="30dp"
+        app:textColor="@android:color/secondary_text_dark">
+    </com.teleca.mm5.gallery.GalleryStaticTextExView>
+    <com.teleca.mm5.gallery.GalleryStaticTextExView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/details_path"
+        android:layout_toRightOf="@id/rotated1"
+        android:layout_marginLeft="2dp"
+        android:id="@+id/rotated2"
+        app:text="i'm rotated! 2!"
+        app:textRotation="60"
+        app:textSize="30dp"
+        app:textColor="@android:color/secondary_text_dark">
+    </com.teleca.mm5.gallery.GalleryStaticTextExView>
+    <com.teleca.mm5.gallery.GalleryStaticTextExView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/details_path"
+        android:layout_toRightOf="@id/rotated2"
+        android:layout_marginLeft="2dp"
+        android:id="@+id/rotated3"
+        app:text="i'm rotated! 3!"
+        app:textRotation="90"
+        app:textSize="30dp"
+        app:textColor="@android:color/secondary_text_dark">
+    </com.teleca.mm5.gallery.GalleryStaticTextExView>
+    <com.teleca.mm5.gallery.GalleryStaticTextExView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/details_path"
+        android:layout_toRightOf="@id/rotated3"
+        android:layout_marginLeft="2dp"
+        android:id="@+id/rotated4"
+        app:text="i'm NOT!"
+        app:textRotation="0"
+        app:textSize="30dp"
+        app:textColor="@android:color/secondary_text_dark">
+    </com.teleca.mm5.gallery.GalleryStaticTextExView>
 </RelativeLayout>
+
