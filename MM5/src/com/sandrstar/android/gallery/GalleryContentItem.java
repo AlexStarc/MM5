@@ -1,7 +1,7 @@
 /**
  * Content item to be used by views
  */
-package com.teleca.mm5.gallery;
+package com.sandrstar.android.gallery;
 
 import android.graphics.Bitmap;
 

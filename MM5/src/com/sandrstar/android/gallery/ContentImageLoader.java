@@ -1,7 +1,7 @@
 /**
  *
  */
-package com.teleca.mm5.gallery;
+package com.sandrstar.android.gallery;
 
 import android.database.Cursor;
 import android.graphics.Bitmap;

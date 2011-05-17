@@ -1,7 +1,7 @@
 /**
  *
  */
-package com.teleca.mm5.gallery;
+package com.sandrstar.android.gallery;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -12,7 +12,6 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.View;
-
 /**
  * @author AlexStarc (sandrstar at hotmail dot com)
  *

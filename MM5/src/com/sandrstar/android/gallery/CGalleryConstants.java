@@ -18,7 +18,7 @@
  * http://sam.zoy.org/wtfpl/COPYING for more details.
  */
 
-package com.teleca.mm5.gallery;
+package com.sandrstar.android.gallery;
 /**
  * This file contains constants to be use by the application like invalid index etc.
  */

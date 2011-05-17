@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res/com.teleca.mm5.gallery"
+                xmlns:app="http://schemas.android.com/apk/res/com.sandrstar.android.gallery"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/details_layout">
@@ -33,7 +33,7 @@
               android:layout_toRightOf="@id/details_path_label"
               android:textSize="20dp">
     </TextView>
-    <com.teleca.mm5.gallery.GalleryStaticTextExView
+    <com.sandrstar.android.gallery.GalleryStaticTextExView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/details_path"
@@ -43,8 +43,8 @@
         app:textRotation="120"
         app:textSize="30dp"
         app:textColor="@android:color/secondary_text_dark">
-    </com.teleca.mm5.gallery.GalleryStaticTextExView>
-    <com.teleca.mm5.gallery.GalleryStaticTextExView
+    </com.sandrstar.android.gallery.GalleryStaticTextExView>
+    <com.sandrstar.android.gallery.GalleryStaticTextExView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/details_path"
@@ -55,8 +55,8 @@
         app:textRotation="60"
         app:textSize="30dp"
         app:textColor="@android:color/secondary_text_dark">
-    </com.teleca.mm5.gallery.GalleryStaticTextExView>
-    <com.teleca.mm5.gallery.GalleryStaticTextExView
+    </com.sandrstar.android.gallery.GalleryStaticTextExView>
+    <com.sandrstar.android.gallery.GalleryStaticTextExView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/details_path"
@@ -67,8 +67,8 @@
         app:textRotation="90"
         app:textSize="30dp"
         app:textColor="@android:color/secondary_text_dark">
-    </com.teleca.mm5.gallery.GalleryStaticTextExView>
-    <com.teleca.mm5.gallery.GalleryStaticTextExView
+    </com.sandrstar.android.gallery.GalleryStaticTextExView>
+    <com.sandrstar.android.gallery.GalleryStaticTextExView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/details_path"
@@ -79,6 +79,6 @@
         app:textRotation="0"
         app:textSize="30dp"
         app:textColor="@android:color/secondary_text_dark">
-    </com.teleca.mm5.gallery.GalleryStaticTextExView>
+    </com.sandrstar.android.gallery.GalleryStaticTextExView>
 </RelativeLayout>
 

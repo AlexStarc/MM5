@@ -1,4 +1,4 @@
-package com.teleca.mm5.gallery;
+package com.sandrstar.android.gallery;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;

@@ -1,7 +1,7 @@
 /**
  * This is implementation of Details view for ContentGallery application
  */
-package com.teleca.mm5.gallery;
+package com.sandrstar.android.gallery;
 
 import android.os.Bundle;
 import android.provider.MediaStore;

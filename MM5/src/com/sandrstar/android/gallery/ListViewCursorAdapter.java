@@ -23,7 +23,9 @@
 /**
  * This is adapter for ListView view of ContentGallery
  */
-package com.teleca.mm5.gallery;
+package com.sandrstar.android.gallery;
+
+import java.io.IOException;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -45,8 +47,6 @@ import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import java.io.IOException;
 
 /**
  * @author AlexStarc

@@ -27,7 +27,7 @@
  * @description This is implementation of list view for Content Gallery. It's intended to display list of
  * phone digital sound assets.
  */
-package com.teleca.mm5.gallery;
+package com.sandrstar.android.gallery;
 
 import java.io.IOException;
 

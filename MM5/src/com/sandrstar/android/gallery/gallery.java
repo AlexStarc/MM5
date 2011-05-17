@@ -19,7 +19,7 @@
  * To Public License, Version 2, as published by Sam Hocevar. See
  * http://sam.zoy.org/wtfpl/COPYING for more details. */
 
-package com.teleca.mm5.gallery;
+package com.sandrstar.android.gallery;
 
 import java.lang.annotation.Documented;
 
