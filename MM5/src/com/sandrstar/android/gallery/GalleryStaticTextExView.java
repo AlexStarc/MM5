@@ -69,23 +69,23 @@ public class GalleryStaticTextExView extends View {
         }
 
         // Color
-        mTextPaint.setColor(aAttr.getColor(R.styleable.GalleryStaticTextExView_textColor, Color.WHITE));
+        this.mTextPaint.setColor(aAttr.getColor(R.styleable.GalleryStaticTextExView_textColor, Color.WHITE));
 
         // Typeface
         switch(aAttr.getInt(R.styleable.GalleryStaticTextExView_textStyle, 0)) {
         // normal
         case 0:
-            mTypeface = Typeface.create((String)null, Typeface.NORMAL);
+            this.mTypeface = Typeface.create((String)null, Typeface.NORMAL);
             break;
 
         // bold
         case 1:
-            mTypeface = Typeface.create((String)null, Typeface.BOLD);
+            this.mTypeface = Typeface.create((String)null, Typeface.BOLD);
             break;
 
         // italic
         case 2:
-            mTypeface = Typeface.create((String)null, Typeface.ITALIC);
+            this.mTypeface = Typeface.create((String)null, Typeface.ITALIC);
             break;
 
         default:
@@ -106,7 +106,7 @@ public class GalleryStaticTextExView extends View {
      * Function to init fields of the view
      */
     private void initGalleryStaticTextExView() {
-        mTextPaint = new Paint();
+        this.mTextPaint = new Paint();
         setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
         setColor(Color.WHITE);
     }
@@ -125,7 +125,7 @@ public class GalleryStaticTextExView extends View {
      * @return the text
      */
     public String getText() {
-        return mText;
+        return this.mText;
     }
 
     /**
@@ -133,7 +133,7 @@ public class GalleryStaticTextExView extends View {
      */
     public void setColor(int color) {
         this.mColor = color;
-        mTextPaint.setColor(color);
+        this.mTextPaint.setColor(color);
         invalidate();
     }
 
@@ -141,7 +141,7 @@ public class GalleryStaticTextExView extends View {
      * @return the mColor
      */
     public int getColor() {
-        return mColor;
+        return this.mColor;
     }
 
     /**
@@ -149,7 +149,7 @@ public class GalleryStaticTextExView extends View {
      */
     public void setTypeface(Typeface mTypeface) {
         this.mTypeface = mTypeface;
-        mTextPaint.setTypeface(mTypeface);
+        this.mTextPaint.setTypeface(mTypeface);
         validateDimensions();
         requestLayout();
         invalidate();
@@ -159,7 +159,7 @@ public class GalleryStaticTextExView extends View {
      * @return the mTypeface
      */
     public Typeface getTypeface() {
-        return mTypeface;
+        return this.mTypeface;
     }
 
     /**
@@ -177,7 +177,7 @@ public class GalleryStaticTextExView extends View {
      * @return the mRotation
      */
     public Integer getRotation() {
-        return mRotation;
+        return this.mRotation;
     }
 
     /**
@@ -185,7 +185,7 @@ public class GalleryStaticTextExView extends View {
      */
     public void setTextSize(int mSize) {
         this.mSize = mSize;
-        mTextPaint.setTextSize(mSize);
+        this.mTextPaint.setTextSize(mSize);
         validateDimensions();
         requestLayout();
         invalidate();
@@ -195,7 +195,7 @@ public class GalleryStaticTextExView extends View {
      * @return the mSize
      */
     public int getTextSize() {
-        return mSize;
+        return this.mSize;
     }
 
     /**
@@ -222,7 +222,7 @@ public class GalleryStaticTextExView extends View {
             // We were told how big to be
             textWidth = specSize;
         } else {
-            textWidth = mWidth;
+            textWidth = this.mWidth;
             textWidth += getPaddingLeft() + getPaddingRight();
 
             if (specMode == MeasureSpec.AT_MOST) {
@@ -249,7 +249,7 @@ public class GalleryStaticTextExView extends View {
             // We were told how big to be
             textHeight = specSize;
         } else {
-            textHeight = mHeight;
+            textHeight = this.mHeight;
             textHeight += getPaddingTop() + getPaddingBottom();
 
             if (specMode == MeasureSpec.AT_MOST) {
@@ -267,9 +267,9 @@ public class GalleryStaticTextExView extends View {
     protected void onDraw(Canvas canvas) {
         Rect clipRect = canvas.getClipBounds();
 
-        canvas.translate(clipRect.left + getPaddingLeft() + mXOffset, clipRect.top + getPaddingTop() + mYOffset);
+        canvas.translate(clipRect.left + getPaddingLeft() + this.mXOffset, clipRect.top + getPaddingTop() + this.mYOffset);
         canvas.rotate(-getRotation(), 0, 0);
-        canvas.drawText(mText, 0, 0, mTextPaint);
+        canvas.drawText(this.mText, 0, 0, this.mTextPaint);
         super.onDraw(canvas);
     }
 
@@ -277,36 +277,36 @@ public class GalleryStaticTextExView extends View {
      * Validates mWidth and mHeight variables or calculates them for first time
      */
     private void validateDimensions() {
-        Integer textNormalWidth = (int) mTextPaint.measureText(mText);
-        Integer textNormalHeight = (int)(-mTextPaint.ascent() + mTextPaint.descent());
+        Integer textNormalWidth = (int) this.mTextPaint.measureText(this.mText);
+        Integer textNormalHeight = (int)(-this.mTextPaint.ascent() + this.mTextPaint.descent());
         Double  widthXProjection  = 0.0;
         Double  widthYProjection  = 0.0;
         Double  heightXProjection = 0.0;
         Double  heightYProjection = 0.0;
 
-        if(mRotation != 0) {
-            widthXProjection  = textNormalWidth * Math.cos(Math.toRadians(Math.abs(mRotation)));
-            heightXProjection = textNormalHeight * Math.cos(Math.toRadians(RIGHT_ANGLE + Math.abs(mRotation)));
-            widthYProjection  = textNormalWidth * Math.sin(Math.toRadians(Math.abs(mRotation)));
-            heightYProjection = textNormalHeight * Math.sin(Math.toRadians(RIGHT_ANGLE + Math.abs(mRotation)));
+        if(this.mRotation != 0) {
+            widthXProjection  = textNormalWidth * Math.cos(Math.toRadians(Math.abs(this.mRotation)));
+            heightXProjection = textNormalHeight * Math.cos(Math.toRadians(RIGHT_ANGLE + Math.abs(this.mRotation)));
+            widthYProjection  = textNormalWidth * Math.sin(Math.toRadians(Math.abs(this.mRotation)));
+            heightYProjection = textNormalHeight * Math.sin(Math.toRadians(RIGHT_ANGLE + Math.abs(this.mRotation)));
 
             // rotation angle presented, so prepare recalculation
-            mWidth = (int)(Math.abs(widthXProjection) + Math.abs(heightXProjection));
-            mHeight = (int)(Math.abs(widthYProjection) + Math.abs(heightYProjection));
+            this.mWidth = (int)(Math.abs(widthXProjection) + Math.abs(heightXProjection));
+            this.mHeight = (int)(Math.abs(widthYProjection) + Math.abs(heightYProjection));
 
             /* we've prepared width and height, but also we need to determine needed offsets
              * in order to eliminate clipping of text then rotating
              */
-            mXOffset = (int)Math.abs(((widthXProjection >= 0.0) ? 0.0 : widthXProjection) +
+            this.mXOffset = (int)Math.abs(((widthXProjection >= 0.0) ? 0.0 : widthXProjection) +
                                      ((heightXProjection >= 0.0) ? 0.0 : heightXProjection));
 
-            mYOffset = (int)(((widthYProjection >= 0.0) ? widthYProjection : 0.0) +
+            this.mYOffset = (int)(((widthYProjection >= 0.0) ? widthYProjection : 0.0) +
                              ((heightYProjection >= 0.0) ? heightYProjection : 0.0));
         } else {
-            mWidth = textNormalWidth;
-            mHeight = textNormalHeight;
-            mXOffset = 0;
-            mYOffset = mHeight;
+            this.mWidth = textNormalWidth;
+            this.mHeight = textNormalHeight;
+            this.mXOffset = 0;
+            this.mYOffset = this.mHeight;
         }
     }
 }

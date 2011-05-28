@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
-    <Button android:layout_alignParentRight="true"
+    <ImageView android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_width="48dp"
             android:layout_height="48dp"
@@ -11,7 +11,7 @@
             android:background="@drawable/listview_item_button"
             android:focusable="false"
             android:id="@+id/listview_item_play">
-    </Button>
+    </ImageView>
     <TextView android:layout_alignParentLeft="true"
               android:layout_toLeftOf="@id/listview_item_play"
               android:layout_width="fill_parent"

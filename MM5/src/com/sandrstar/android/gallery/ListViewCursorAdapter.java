@@ -33,6 +33,7 @@ import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.MediaStore;
+import android.provider.MediaStore.Audio.AudioColumns;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -43,8 +44,8 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.ScaleAnimation;
-import android.widget.Button;
 import android.widget.CursorAdapter;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -80,26 +81,26 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
      */
     public ListViewCursorAdapter(Context context, Cursor c, boolean autoReQuery) {
         super(context, c, autoReQuery);
-        Log.i(TAG, "created");
+        Log.i(this.TAG, "created");
 
-        mPlayProgressUpdateHandler = new Handler();
+        this.mPlayProgressUpdateHandler = new Handler();
         // create MediaPlayer for playing of selected sound
-        mPlayer = new MediaPlayer();
-        mPlayer.setOnCompletionListener(this);
+        this.mPlayer = new MediaPlayer();
+        this.mPlayer.setOnCompletionListener(this);
 
-        mUpdatePlayProgress = new Runnable() {
+        this.mUpdatePlayProgress = new Runnable() {
             @Override
             public void run() {
                 String itemText;
                 Time trackTime = new Time();
 
                 // make elapsed time bigger
-                if( mPlayer != null ) {
-                    mnPlayTime = mPlayer.getCurrentPosition() / 1000;
+                if( ListViewCursorAdapter.this.mPlayer != null ) {
+                    ListViewCursorAdapter.this.mnPlayTime = ListViewCursorAdapter.this.mPlayer.getCurrentPosition() / 1000;
 
-                    if(null != mElapsedText &&
-                       null != mProgressBar) {
-                        trackTime.set(mnPlayTime * 1000);
+                    if(null != ListViewCursorAdapter.this.mElapsedText &&
+                       null != ListViewCursorAdapter.this.mProgressBar) {
+                        trackTime.set(ListViewCursorAdapter.this.mnPlayTime * 1000);
 
                         // determine how time should be shown - currently check only hours existence
                         if(trackTime.hour <= 0) {
@@ -108,11 +109,11 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
                             itemText = trackTime.format("%H:%M:%S");
                         }
 
-                        mElapsedText.setText(itemText);
-                        mProgressBar.setProgress(mnPlayTime);
+                        ListViewCursorAdapter.this.mElapsedText.setText(itemText);
+                        ListViewCursorAdapter.this.mProgressBar.setProgress(ListViewCursorAdapter.this.mnPlayTime);
                     }
 
-                    mPlayProgressUpdateHandler.postAtTime(this, SystemClock.uptimeMillis() + 1000);
+                    ListViewCursorAdapter.this.mPlayProgressUpdateHandler.postAtTime(this, SystemClock.uptimeMillis() + 1000);
                 }
             }
         };
@@ -135,10 +136,10 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
             viewTag.setIndex(cursor.getPosition());
             elementView.setTag(viewTag);
 
-            if(mnFocus == cursor.getPosition()) {
+            if(this.mnFocus == cursor.getPosition()) {
                 populateFocusView(elementView, cursor);
 
-                if(!mbSelectAnimationPlayed) {
+                if(!this.mbSelectAnimationPlayed) {
                     // play animation on focused view
                     AnimationSet showUpAnimationSet = new AnimationSet(true);
 
@@ -154,20 +155,20 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
                     showUpAnimationSet.setInterpolator(new DecelerateInterpolator());
 
                     elementView.startAnimation(showUpAnimationSet);
-                    mbSelectAnimationPlayed = true;
+                    this.mbSelectAnimationPlayed = true;
                 }
             }
 
-            Button playButton = (Button)elementView.findViewById(R.id.listview_item_play);
+            ImageView playButton = (ImageView)elementView.findViewById(R.id.listview_item_play);
 
             // also, update icon if it's currently playing item
-            if(mnPlayIndex == cursor.getPosition()) {
+            if(this.mnPlayIndex == cursor.getPosition()) {
                 playButton.setBackgroundResource(R.drawable.listview_item_stop_button);
             } else {
                 playButton.setBackgroundResource(R.drawable.listview_item_button);
             }
         } catch(Exception e) {
-            Log.e(TAG, "bindView(): " + e.getClass() + " thrown " + e.getMessage());
+            Log.e(this.TAG, "bindView(): " + e.getClass() + " thrown " + e.getMessage());
         }
     }
 
@@ -178,7 +179,7 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
         try {
             final LayoutInflater inflater = LayoutInflater.from(context);
 
-            if( mnFocus == cursor.getPosition() ) {
+            if( this.mnFocus == cursor.getPosition() ) {
                 elementView = inflater.inflate(R.layout.listviewgallery_item_selected, parent, false);
                 populateFocusView(elementView, cursor);
             } else {
@@ -188,7 +189,7 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
             int fileNameCol = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME);
             String fileName = cursor.getString(fileNameCol);
             TextView fileNameView = (TextView)elementView.findViewById(R.id.listview_item_text);
-            Button playButton = (Button)elementView.findViewById(R.id.listview_item_play);
+            ImageView playButton = (ImageView)elementView.findViewById(R.id.listview_item_play);
 
             if(null != fileNameView) {
                 fileNameView.setText(fileName);
@@ -197,7 +198,7 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
             if(null != playButton) {
                 playButton.setOnClickListener(getPlayButtonListener());
                 // also, update icon if it's currently playing item
-                if( mnPlayIndex == cursor.getPosition() ) {
+                if( this.mnPlayIndex == cursor.getPosition() ) {
                     playButton.setBackgroundResource(R.drawable.listview_item_stop_button);
                 } else {
                     playButton.setBackgroundResource(R.drawable.listview_item_button);
@@ -210,11 +211,11 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
             viewTag.setIndex(cursor.getPosition());
             elementView.setTag(viewTag);
         } catch(Exception e) {
-            Log.e(TAG, "newView(): " + e.getClass() + " thrown " + e.getMessage());
+            Log.e(this.TAG, "newView(): " + e.getClass() + " thrown " + e.getMessage());
         }
 
-        if(mnFocus == cursor.getPosition() &&
-           !mbSelectAnimationPlayed) {
+        if(this.mnFocus == cursor.getPosition() &&
+           !this.mbSelectAnimationPlayed) {
             // play animation on focused view
             AnimationSet showUpAnimationSet = new AnimationSet(true);
 
@@ -233,7 +234,7 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
                 elementView.startAnimation(showUpAnimationSet);
             }
 
-            mbSelectAnimationPlayed = true;
+            this.mbSelectAnimationPlayed = true;
         }
 
         return elementView;
@@ -250,7 +251,7 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
      * @return the playButtonListener
      */
     public OnClickListener getPlayButtonListener() {
-        return playButtonListener;
+        return this.playButtonListener;
     }
 
     /**
@@ -258,7 +259,7 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
      */
     public void setNFocus(Integer nFocus) {
         this.mnFocus = nFocus;
-        mbSelectAnimationPlayed = false;
+        this.mbSelectAnimationPlayed = false;
         notifyDataSetChanged();
     }
 
@@ -283,7 +284,7 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
         itemTextView = (TextView)elementView.findViewById(R.id.listview_item_artist);
 
         if(null != itemTextView) {
-            itemText = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+            itemText = cursor.getString(cursor.getColumnIndex(AudioColumns.ARTIST));
 
             itemText = "Artist: " + ((itemText == null) ? GALLERYVIEW_UNDEFINED_FIELD : itemText);
             itemTextView.setText(itemText);
@@ -292,7 +293,7 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
         itemTextView = (TextView)elementView.findViewById(R.id.listview_item_album);
 
         if(null != itemTextView) {
-            itemText = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
+            itemText = cursor.getString(cursor.getColumnIndex(AudioColumns.ALBUM));
 
             itemText = "Album: " + ((itemText == null) ? GALLERYVIEW_UNDEFINED_FIELD : itemText);
             itemTextView.setText(itemText);
@@ -301,7 +302,7 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
         itemTextView = (TextView)elementView.findViewById(R.id.listview_item_duration);
 
         if(null != itemTextView) {
-            itemText = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
+            itemText = cursor.getString(cursor.getColumnIndex(AudioColumns.DURATION));
 
             if(itemText == null) {
                 itemText = GALLERYVIEW_UNDEFINED_FIELD;
@@ -334,13 +335,13 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
         }
 
         // check if we're populating now playing view and obtain playing view if missed
-        if(mPlayProgressView == null && mnFocus.equals(mnPlayIndex)) {
+        if(this.mPlayProgressView == null && this.mnFocus.equals(this.mnPlayIndex)) {
             initPlayingProgressView(elementView);
         }
 
-        if(mPlayProgressView != null) {
+        if(this.mPlayProgressView != null) {
             // show up or hide progress if the file is currently playing
-            mPlayProgressView.setVisibility(this.mnPlayIndex.equals(this.mnFocus) ? View.VISIBLE : View.INVISIBLE);
+            this.mPlayProgressView.setVisibility(this.mnPlayIndex.equals(this.mnFocus) ? View.VISIBLE : View.INVISIBLE);
         }
     }
 
@@ -353,7 +354,7 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
      */
     public void setNPlayIndex(Integer nPlayIndex, View listItemView) throws IOException {
         try {
-            mPlayer.reset();
+            this.mPlayer.reset();
             this.mnPlayIndex = nPlayIndex;
             GalleryContentItem itemTag = null;
 
@@ -376,13 +377,13 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
                 // remember play progress view in order to let it to be properly updated
                 initPlayingProgressView(listItemView);
 
-                if(null != mPlayProgressView ) {
-                    mPlayProgressView.setVisibility(View.VISIBLE);
+                if(null != this.mPlayProgressView ) {
+                    this.mPlayProgressView.setVisibility(View.VISIBLE);
                 }
             } else {
                 if(nPlayIndex < 0) {
-                    if(null != mPlayProgressView) {
-                        mPlayProgressView.setVisibility(View.INVISIBLE);
+                    if(null != this.mPlayProgressView) {
+                        this.mPlayProgressView.setVisibility(View.INVISIBLE);
                         // need to reset progress also in order to eliminate incorrect play begin
                         this.mProgressBar.setProgress(0);
                     }
@@ -391,13 +392,13 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
                     this.mElapsedText = null;
                     this.mProgressBar = null;
                     this.mnPlayTime = 0;
-                    this.mPlayProgressUpdateHandler.removeCallbacks(mUpdatePlayProgress);
+                    this.mPlayProgressUpdateHandler.removeCallbacks(this.mUpdatePlayProgress);
                 }
             }
 
             notifyDataSetChanged();
         } catch(Exception e) {
-            Log.e(TAG, "setNPlayIndex(): " + e.getClass() + " thrown " + e.getMessage());
+            Log.e(this.TAG, "setNPlayIndex(): " + e.getClass() + " thrown " + e.getMessage());
         }
     }
 
@@ -420,21 +421,20 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
 
     @Override
     public int getItemViewType(int position) {
-        if(position == this.mnFocus)
-        {
+        if(position == this.mnFocus) {
             return GALLERYLISTVIEW_ITEM_ACTIVE;
-        } else {
-            return GALLERYLISTVIEW_ITEM_NONACTIVE;
         }
+
+        return GALLERYLISTVIEW_ITEM_NONACTIVE;
     }
 
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
         try {
             this.setNPlayIndex(CGalleryConstants.GALLERY_INVALID_INDEX.value(), null);
-            mPlayProgressUpdateHandler.removeCallbacks(mUpdatePlayProgress);
+            this.mPlayProgressUpdateHandler.removeCallbacks(this.mUpdatePlayProgress);
         } catch (IOException e) {
-            Log.e(TAG, "onCompletion(): " + e.getClass() + " thrown " + e.getMessage());
+            Log.e(this.TAG, "onCompletion(): " + e.getClass() + " thrown " + e.getMessage());
         }
 
         notifyDataSetChanged();
@@ -447,26 +447,26 @@ public class ListViewCursorAdapter extends CursorAdapter implements MediaPlayer.
      */
     private void initPlayingProgressView(View elementView) {
         // remember play progress view in order to let it to be properly updated
-        mPlayProgressView = elementView.findViewById(R.id.listview_play_progressbar);
-        mElapsedText = null;
-        mProgressBar = null;
+        this.mPlayProgressView = elementView.findViewById(R.id.listview_play_progressbar);
+        this.mElapsedText = null;
+        this.mProgressBar = null;
 
-        if(null != mPlayProgressView ) {
-            mElapsedText = (TextView)mPlayProgressView.findViewById(R.id.play_progressbar_elapsed_time);
-            mProgressBar = (ProgressBar)mPlayProgressView.findViewById(R.id.play_progressbar_bar);
+        if(null != this.mPlayProgressView ) {
+            this.mElapsedText = (TextView)this.mPlayProgressView.findViewById(R.id.play_progressbar_elapsed_time);
+            this.mProgressBar = (ProgressBar)this.mPlayProgressView.findViewById(R.id.play_progressbar_bar);
 
-            if(null != mProgressBar) {
-                mProgressBar.setProgress(0);
+            if(null != this.mProgressBar) {
+                this.mProgressBar.setProgress(0);
             }
 
-            if(null != mElapsedText) {
-                mElapsedText.setText(GALLERYVIEW_START_TIME);
+            if(null != this.mElapsedText) {
+                this.mElapsedText.setText(GALLERYVIEW_START_TIME);
             }
             // NOTE: maximum value for progress bar will be set in the adapter
 
             // here we're also starting timers callbacks for playing
-            mPlayProgressUpdateHandler.removeCallbacks(mUpdatePlayProgress);
-            mPlayProgressUpdateHandler.postDelayed(mUpdatePlayProgress, CGalleryConstants.GALLERYLIST_PROGRESS_UPDATE_INTERVAL.value());
+            this.mPlayProgressUpdateHandler.removeCallbacks(this.mUpdatePlayProgress);
+            this.mPlayProgressUpdateHandler.postDelayed(this.mUpdatePlayProgress, CGalleryConstants.GALLERYLIST_PROGRESS_UPDATE_INTERVAL.value());
         }
     }
 }

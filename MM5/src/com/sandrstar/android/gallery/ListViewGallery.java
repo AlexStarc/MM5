@@ -41,7 +41,7 @@ import android.view.View.OnClickListener;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 /**
@@ -60,10 +60,10 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
         setContentType(GalleryViewType.GALLERY_LIST);
         super.onCreate(savedInstanceState);
 
-        nFocusIndex = CGalleryConstants.GALLERY_INVALID_INDEX.value();
+        this.nFocusIndex = CGalleryConstants.GALLERY_INVALID_INDEX.value();
         // setup options bar
-        mOptionsBar = new GalleryOptionsBar(this, R.id.listview_optionbar);
-        mOptionsBar.setOptionsHandler(this);
+        this.mOptionsBar = new GalleryOptionsBar(this, R.id.listview_optionbar);
+        this.mOptionsBar.setOptionsHandler(this);
     }
 
     @Override
@@ -76,11 +76,12 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
                 @Override
                 public void onItemSelected(AdapterView<?> arg0, View view,
                                            int mSelectItemId, long arg3) {
-                    nFocusIndex = mSelectItemId;
+                    ListViewGallery.this.nFocusIndex = mSelectItemId;
                 }
 
                 @Override
                 public void onNothingSelected(AdapterView<?> arg0) {
+                    // nothing to do here
                 }
             });
 
@@ -90,14 +91,14 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
                                         View view,
                                         int position,
                                         long id) {
-                    if( nFocusIndex < 0 ) {
+                    if( ListViewGallery.this.nFocusIndex < 0 ) {
                         // show options bar
-                        mOptionsBar.showOptionBar();
+                        ListViewGallery.this.mOptionsBar.showOptionBar();
                     }
 
-                    if(nFocusIndex != position) {
-                        contentAdapter.setNFocus(position);
-                        nFocusIndex = position;
+                    if(ListViewGallery.this.nFocusIndex != position) {
+                        ListViewGallery.this.contentAdapter.setNFocus(position);
+                        ListViewGallery.this.nFocusIndex = position;
                     }
                 }
             });
@@ -106,27 +107,28 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
 
                 @Override
                 public void onScrollStateChanged(AbsListView view, int scrollState) {
-                    if(nFocusIndex >= 0) {
+                    if(ListViewGallery.this.nFocusIndex >= 0) {
                         // reset focus
-                        nFocusIndex = CGalleryConstants.GALLERY_INVALID_INDEX.value();
-                        contentAdapter.setNFocus(nFocusIndex);
-                        mOptionsBar.hideOptionBar();
+                        ListViewGallery.this.nFocusIndex = CGalleryConstants.GALLERY_INVALID_INDEX.value();
+                        ListViewGallery.this.contentAdapter.setNFocus(ListViewGallery.this.nFocusIndex);
+                        ListViewGallery.this.mOptionsBar.hideOptionBar();
                     }
                 }
 
                 @Override
                 public void onScroll(AbsListView view, int firstVisibleItem,
                                      int visibleItemCount, int totalItemCount) {
+                    // nothing to do here
                 }
             });
 
             // create adapter based on received cursor and attach it to list view
-            contentAdapter = new ListViewCursorAdapter(getApplicationContext(),
+            this.contentAdapter = new ListViewCursorAdapter(getApplicationContext(),
                                                        getContentCursor(),
                                                        false
             );
-            contentAdapter.setPlayButtonListener(this);
-            getMainView().setAdapter(contentAdapter);
+            this.contentAdapter.setPlayButtonListener(this);
+            getMainView().setAdapter(this.contentAdapter);
         }
     }
 
@@ -138,39 +140,39 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
         try {
             // Listener for play click
             View listItemView = (View)v.getParent();
-            Button playButton;
-            View playView = getMainView().getChildAt(contentAdapter.getNPlayIndex());
+            ImageView playButton;
+            View playView = getMainView().getChildAt(this.contentAdapter.getNPlayIndex());
 
             GalleryContentItem itemTag = (GalleryContentItem)listItemView.getTag();
 
             if(itemTag == null) {
                 // somehow we haven't received tag, so, retrieve index and obtain tag
-                contentAdapter.bindView(listItemView, getApplicationContext(), getContentCursor());
+                this.contentAdapter.bindView(listItemView, getApplicationContext(), getContentCursor());
                 itemTag = (GalleryContentItem)listItemView.getTag();
             }
 
             if( playView != null ) {
-                playButton = (Button)playView.findViewById(R.id.listview_item_play);
+                playButton = (ImageView)playView.findViewById(R.id.listview_item_play);
 
                 playButton.setBackgroundResource(R.drawable.listview_item_button);
             }
 
             if(null != playView &&
-               contentAdapter.getNPlayIndex().equals(itemTag.getIndex())) {
-                contentAdapter.setNPlayIndex(CGalleryConstants.GALLERY_INVALID_INDEX.value(), null);
+               this.contentAdapter.getNPlayIndex().equals(itemTag.getIndex())) {
+                this.contentAdapter.setNPlayIndex(CGalleryConstants.GALLERY_INVALID_INDEX.value(), null);
             } else {
                 if(null != itemTag) {
-                    playButton = (Button)listItemView.findViewById(R.id.listview_item_play);
+                    playButton = (ImageView)listItemView.findViewById(R.id.listview_item_play);
 
                     playButton.setBackgroundResource(R.drawable.listview_item_stop_button);
 
                     // Also focus playing item if its not already expanded
-                    if(!itemTag.getIndex().equals(contentAdapter.getNFocus())) {
-                        contentAdapter.setNFocus(itemTag.getIndex());
-                        nFocusIndex = itemTag.getIndex();
+                    if(!itemTag.getIndex().equals(this.contentAdapter.getNFocus())) {
+                        this.contentAdapter.setNFocus(itemTag.getIndex());
+                        this.nFocusIndex = itemTag.getIndex();
                     }
 
-                    contentAdapter.setNPlayIndex(itemTag.getIndex(), listItemView);
+                    this.contentAdapter.setNPlayIndex(itemTag.getIndex(), listItemView);
                 }
             }
         } catch(Exception e) {
@@ -181,7 +183,7 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
     @Override
     protected void onPause() {
         try {
-            contentAdapter.setNPlayIndex(CGalleryConstants.GALLERY_INVALID_INDEX.value(), null);
+            this.contentAdapter.setNPlayIndex(CGalleryConstants.GALLERY_INVALID_INDEX.value(), null);
         } catch (IOException e) {
             Log.e(TAG, "onPause(): " + e.getClass() + " thrown " + e.getMessage());
         }
@@ -191,7 +193,7 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
     @Override
     protected void onStop() {
         try {
-            contentAdapter.setNPlayIndex(CGalleryConstants.GALLERY_INVALID_INDEX.value(), null);
+            this.contentAdapter.setNPlayIndex(CGalleryConstants.GALLERY_INVALID_INDEX.value(), null);
         } catch (IOException e) {
             Log.e(TAG, "onStop(): " + e.getClass() + " thrown " + e.getMessage());
         }
@@ -207,8 +209,8 @@ public class ListViewGallery extends GalleryView<ListView> implements GalleryVie
             // launch details with extras
             Intent launchDetails = new Intent(getGalleryViewContext(), DetailsView.class);
 
-            if(nFocusIndex >= 0) {
-                launchDetails.putExtra("com.teleca.mm5.gallery.FocusIndex", nFocusIndex);
+            if(this.nFocusIndex >= 0) {
+                launchDetails.putExtra("com.teleca.mm5.gallery.FocusIndex", this.nFocusIndex);
             } else {
                 launchDetails.putExtra("com.teleca.mm5.gallery.FocusIndex", 0);
             }
