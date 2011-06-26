@@ -8,7 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.MediaStore;
+import android.provider.MediaStore.MediaColumns;
 import android.util.Log;
 
 /**
@@ -16,12 +16,12 @@ import android.util.Log;
  *
  */
 public class ContentImageLoader implements Runnable {
-    private Cursor imagesCursor;
-    private Handler callerHdlr;
+    private final Cursor imagesCursor;
+    private final Handler callerHdlr;
     private Bitmap bm;
     private Integer nItemId;
-    private Integer nRequiredWidth;
-    private Integer nRequiredHeight;
+    private final Integer nRequiredWidth;
+    private final Integer nRequiredHeight;
     private final static String TAG = "ContentImageLoader";
     private BitmapFactory.Options decodeOpt = null;
 
@@ -34,41 +34,41 @@ public class ContentImageLoader implements Runnable {
      * @param nRequiredWidth expected width of out image
      * @param nRequiredHeight expected height of out image
      */
-    public ContentImageLoader(Cursor imagesCursor,
-                              Integer nItemId,
-                              Handler callerHdlr,
-                              int nRequiredWidth,
-                              int nRequiredHeight,
-                              int densityDpi,
-                              boolean bKeepQuality) {
+    public ContentImageLoader(final Cursor imagesCursor,
+                              final Integer nItemId,
+                              final Handler callerHdlr,
+                              final int nRequiredWidth,
+                              final int nRequiredHeight,
+                              @SuppressWarnings("unused") final int densityDpi,
+                              final boolean bKeepQuality) {
         this.imagesCursor = imagesCursor;
         this.callerHdlr = callerHdlr;
         this.nRequiredWidth = nRequiredWidth;
         this.nRequiredHeight = nRequiredHeight;
-        this.setnItemId(nItemId);
+        setnItemId(nItemId);
 
-        decodeOpt = new BitmapFactory.Options();
+        this.decodeOpt = new BitmapFactory.Options();
 
         if( nRequiredWidth > 0 && nRequiredHeight > 0 ) {
             if(!bKeepQuality) {
-                decodeOpt.inSampleSize = 6;
+                this.decodeOpt.inSampleSize = 6;
             } else {
-                decodeOpt.inSampleSize = 4;
+                this.decodeOpt.inSampleSize = 4;
             }
 
             // use 72 DPI as common for displays
-            decodeOpt.inDensity = 72;
-            decodeOpt.inPurgeable = true;
-            decodeOpt.inTargetDensity = 72;
-            decodeOpt.inScaled = true;
-            decodeOpt.inInputShareable = true;
+            this.decodeOpt.inDensity = 72;
+            this.decodeOpt.inPurgeable = true;
+            this.decodeOpt.inTargetDensity = 72;
+            this.decodeOpt.inScaled = true;
+            this.decodeOpt.inInputShareable = true;
         }
     }
 
     @Override
     public void run() {
         try {
-            Message callbackMsg = Message.obtain();
+            final Message callbackMsg = Message.obtain();
             Bitmap srcBitmap = null;
             Integer srcWidth = 0;
             Integer srcHeight = 0;
@@ -76,58 +76,56 @@ public class ContentImageLoader implements Runnable {
             Integer nSampleRatio = 0;
 
             callbackMsg.obj = this;
-            callbackMsg.setTarget(callerHdlr);
+            callbackMsg.setTarget(this.callerHdlr);
 
-            if(null != imagesCursor) {
+            if(null != this.imagesCursor) {
                 try {
-                    imagesCursor.moveToPosition(nItemId);
-                    contentPath = imagesCursor.getString(imagesCursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                    this.imagesCursor.moveToPosition(this.nItemId);
+                    contentPath = this.imagesCursor.getString(this.imagesCursor.getColumnIndex(MediaColumns.DATA));
 
                     if(null != contentPath) {
                         // try to make GC every time before we're decoding new image
-                        System.gc();
-                        decodeOpt.inJustDecodeBounds = true;
+                        this.decodeOpt.inJustDecodeBounds = true;
                         srcBitmap = BitmapFactory.decodeFile( contentPath,
-                                                              decodeOpt );
-                        decodeOpt.inJustDecodeBounds = false;
+                                                              this.decodeOpt );
+                        this.decodeOpt.inJustDecodeBounds = false;
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     Log.e(TAG,
                           "run(): " + e.getClass() + " thrown " + e.getMessage());
                 }
             }
 
-            srcWidth = decodeOpt.outWidth;
-            srcHeight = decodeOpt.outHeight;
+            srcWidth = this.decodeOpt.outWidth;
+            srcHeight = this.decodeOpt.outHeight;
 
             /* need to determine if original width and height lower
              *  than requested and decode small images in better quality
              */
             if(srcWidth <= this.nRequiredWidth &&
                srcHeight <= this.nRequiredHeight &&
-               decodeOpt.inSampleSize > 2) {
+               this.decodeOpt.inSampleSize > 2) {
                 nSampleRatio = ( this.nRequiredWidth * this.nRequiredHeight ) / ( srcWidth * srcHeight );
 
                 if(nSampleRatio >= 2) {
-                    decodeOpt.inSampleSize = 2;
+                    this.decodeOpt.inSampleSize = 2;
                 } else {
-                    decodeOpt.inSampleSize = 4;
+                    this.decodeOpt.inSampleSize = 4;
                 }
             } else {
                 nSampleRatio = ( srcWidth * srcHeight ) / ( this.nRequiredWidth * this.nRequiredHeight );
 
                 if( nSampleRatio <= 2 ) {
-                    decodeOpt.inSampleSize = 6;
+                    this.decodeOpt.inSampleSize = 6;
                 } else {
-                    decodeOpt.inSampleSize = 8;
+                    this.decodeOpt.inSampleSize = 8;
                 }
             }
 
             try {
-                System.gc();
                 srcBitmap = BitmapFactory.decodeFile( contentPath,
-                                                      decodeOpt );
-            } catch (Exception e) {
+                                                      this.decodeOpt );
+            } catch (final Exception e) {
                 Log.e(TAG,
                       "run(): " + e.getClass() + " thrown " + e.getMessage());
             }
@@ -138,7 +136,7 @@ public class ContentImageLoader implements Runnable {
             if( ( this.nRequiredWidth > 0 && this.nRequiredHeight > 0 ) &&
                 ( srcWidth > this.nRequiredWidth || srcHeight > this.nRequiredHeight ) ) {
                 // calculate out image dimensions keep aspect ratio
-                Double ratio = (double)srcHeight / (double)srcWidth;
+                final Double ratio = (double)srcHeight / (double)srcWidth;
 
                 if( this.nRequiredWidth <= srcWidth ) {
                     srcWidth = this.nRequiredWidth;
@@ -159,18 +157,21 @@ public class ContentImageLoader implements Runnable {
                     srcHeight = 1;
                 }
 
-                bm = Bitmap.createScaledBitmap(srcBitmap,
-                                               srcWidth,
-                                               srcHeight,
-                                               false);
-                srcBitmap.recycle();
+                this.bm = Bitmap.createScaledBitmap(srcBitmap,
+                                                    srcWidth,
+                                                    srcHeight,
+                                                    false);
+                if(null != srcBitmap) {
+                    srcBitmap.recycle();
+                }
+
                 srcBitmap = null;
             } else {
-                bm = srcBitmap;
+                this.bm = srcBitmap;
             }
 
             callbackMsg.sendToTarget();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             Log.e( TAG, "run(): " + e.getClass() + " thrown " + e.getMessage());
         }
     }
@@ -178,7 +179,7 @@ public class ContentImageLoader implements Runnable {
     /**
      * @param bm the bm to set
      */
-    public void setBm(Bitmap bm) {
+    public void setBm(final Bitmap bm) {
         this.bm = bm;
     }
 
@@ -186,13 +187,13 @@ public class ContentImageLoader implements Runnable {
      * @return the bm
      */
     public Bitmap getBm() {
-        return bm;
+        return this.bm;
     }
 
     /**
      * @param nItemId the nItemId to set
      */
-    public void setnItemId(Integer nItemId) {
+    public void setnItemId(final Integer nItemId) {
         this.nItemId = nItemId;
     }
 
@@ -200,7 +201,7 @@ public class ContentImageLoader implements Runnable {
      * @return the nItemId
      */
     public Integer getnItemId() {
-        return nItemId;
+        return this.nItemId;
     }
 
 }

@@ -9,7 +9,7 @@
                  android:debuggable="true"
                  android:icon="@drawable/icon"
                  android:label="@string/app_name">
-        <activity android:name=".gallery"
+        <activity android:name=".Gallery"
                   android:activityOpenEnterAnimation="@android:style/Animation.Translucent"
                   android:activityCloseExitAnimation="@android:style/Animation.Translucent">
             <intent-filter>

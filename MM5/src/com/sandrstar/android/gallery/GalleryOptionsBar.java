@@ -39,9 +39,9 @@ public class GalleryOptionsBar {
     private static final String TAG = "GalleryOptionsBar";
     private Animation mOptionBarShow = null;
     private Animation mOptionBarHide = null;
-    private ViewGroup optionsBarView = null;
+    ViewGroup optionsBarView = null;
     private Handler.Callback optionsHandler = null;
-    private Integer[] optionsItems = null;
+    Integer[] optionsItems = null;
 
     /**
      * Main constructor for OptionsBar
@@ -49,59 +49,59 @@ public class GalleryOptionsBar {
      * @param parent - parent Gallery view of this options bar
      * @param optionBarViewId - options bar view id inside parent GalleryView
      */
-    public GalleryOptionsBar(Activity parent, Integer optionBarViewId) {
+    public GalleryOptionsBar(final Activity parent, final Integer optionBarViewId) {
         try {
-            mOptionBarShow = AnimationUtils.loadAnimation(parent.getApplicationContext(), R.anim.thumbnail_optionbar_show);
-            mOptionBarHide = AnimationUtils.loadAnimation(parent.getApplicationContext(), R.anim.thumbnail_optionbar_hide);
+            this.mOptionBarShow = AnimationUtils.loadAnimation(parent.getApplicationContext(), R.anim.thumbnail_optionbar_show);
+            this.mOptionBarHide = AnimationUtils.loadAnimation(parent.getApplicationContext(), R.anim.thumbnail_optionbar_hide);
 
-            optionsBarView = (ViewGroup)parent.findViewById(optionBarViewId);
-        } catch(Exception e) {
+            this.optionsBarView = (ViewGroup)parent.findViewById(optionBarViewId);
+        } catch(final Exception e) {
             Log.e(TAG, "GalleryOptionsBar(): " + e.getClass() + " thrown " + e.getMessage());
         }
     }
 
     public void showOptionBar() {
-        if(null != optionsBarView) {
-            optionsBarView.startAnimation(mOptionBarShow);
-            optionsBarView.setVisibility(View.VISIBLE);
+        if(null != this.optionsBarView) {
+            this.optionsBarView.startAnimation(this.mOptionBarShow);
+            this.optionsBarView.setVisibility(View.VISIBLE);
         }
     }
 
     public void hideOptionBar() {
-        if(null != optionsBarView) {
-            optionsBarView.startAnimation(mOptionBarHide);
-            optionsBarView.setVisibility(View.INVISIBLE);
+        if(null != this.optionsBarView) {
+            this.optionsBarView.startAnimation(this.mOptionBarHide);
+            this.optionsBarView.setVisibility(View.INVISIBLE);
         }
     }
 
     /**
      * @param optionsHandler the optionsHandler to set
      */
-    public void setOptionsHandler(Handler.Callback optionsHandler) {
+    public void setOptionsHandler(final Handler.Callback optionsHandler) {
         this.optionsHandler = optionsHandler;
 
         // handler was set, so setup messages sending and options array
         // add listeners to all options in separate thread
-        Thread enumerationOptions = new Thread( new Runnable() {
+        final Thread enumerationOptions = new Thread( new Runnable() {
             @Override
             public void run() {
                 try {
                     View buttonOption = null;
 
-                    optionsItems = new Integer[optionsBarView.getChildCount()];
+                    GalleryOptionsBar.this.optionsItems = new Integer[GalleryOptionsBar.this.optionsBarView.getChildCount()];
 
-                    for(int i = 0; i < optionsItems.length; i++) {
-                        buttonOption = optionsBarView.getChildAt(i);
+                    for(int i = 0; i < GalleryOptionsBar.this.optionsItems.length; i++) {
+                        buttonOption = GalleryOptionsBar.this.optionsBarView.getChildAt(i);
 
                         // Listeners will be added only to Buttons items
                         if(null != buttonOption &&
                            (buttonOption instanceof Button)) {
-                            optionsItems[i] = buttonOption.getId();
+                            GalleryOptionsBar.this.optionsItems[i] = buttonOption.getId();
 
                             buttonOption.setOnClickListener(new GalleryOptionsBarClickListener(i));
                         }
                     }
-                } catch(Exception e) {
+                } catch(final Exception e) {
                     Log.e(TAG, "enumerationOptions(): " + e.getClass() + " thrown " + e.getMessage());
                 }
             }
@@ -114,28 +114,28 @@ public class GalleryOptionsBar {
      * @return the optionsHandler
      */
     public Handler.Callback getOptionsHandler() {
-        return optionsHandler;
+        return this.optionsHandler;
     }
 
-    public void handleOptionSelection(Integer index) {
+    public void handleOptionSelection(final Integer index) {
         // find id and send proper message to options owner
-        Message msg = Message.obtain();
+        final Message msg = Message.obtain();
 
-        msg.arg1 = optionsItems[index];
+        msg.arg1 = this.optionsItems[index];
 
-        optionsHandler.handleMessage(msg);
+        this.optionsHandler.handleMessage(msg);
     }
 
     class GalleryOptionsBarClickListener implements View.OnClickListener {
         private Integer index = -1;
 
-        public GalleryOptionsBarClickListener(Integer index) {
+        public GalleryOptionsBarClickListener(final Integer index) {
             this.index = index;
         }
 
         @Override
-        public void onClick(View v) {
-            handleOptionSelection(index);
+        public void onClick(final View v) {
+            handleOptionSelection(this.index);
         }
     }
 }

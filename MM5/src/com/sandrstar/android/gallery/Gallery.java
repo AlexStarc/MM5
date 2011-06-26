@@ -48,7 +48,7 @@ import android.widget.Toast;
                 author = "Alexander Starchenko",
                 description = "main menu view"
 )
-public class gallery extends GalleryView<ListView> implements OnItemClickListener {
+public class Gallery extends GalleryView<ListView> implements OnItemClickListener {
     private static final String TAG = "gallery";
 
     /** Called when the activity is first created. */

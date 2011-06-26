@@ -27,37 +27,38 @@ class GalleryWorkTask extends AsyncTask<GalleryContentType, Integer, GalleryWork
 
     /** Constructors of async gallery work task */
     public GalleryWorkTask() {
+        // nothing to do here
     }
 
-    public GalleryWorkTask(GalleryViewInterface parentGalleryView) {
-        this.setParentGalleryView(parentGalleryView);
-    }
-
-    @Override
-    protected void onProgressUpdate(Integer... progress) {
-        parentGalleryView.progressWorkExecution(1);
+    public GalleryWorkTask(final GalleryViewInterface parentGalleryView) {
+        setParentGalleryView(parentGalleryView);
     }
 
     @Override
-    protected void onPostExecute(GalleryWorkTaskResult result) {
+    protected void onProgressUpdate(final Integer... progress) {
+        this.parentGalleryView.progressWorkExecution(1);
+    }
+
+    @Override
+    protected void onPostExecute(final GalleryWorkTaskResult result) {
         Log.i( TAG, "bg processign finished, invoke back parent view" );
         /* Share execution resulted list with parent view,
          * where's no need to share it if its empty */
-        parentGalleryView.setContentCursor(mainContentCursor);
+        this.parentGalleryView.setContentCursor(this.mainContentCursor);
 
         /* Share status with parent view in order to notify about errors, if any */
-        parentGalleryView.finishedWorkExecution(result);
+        this.parentGalleryView.finishedWorkExecution(result);
     }
 
     /**
      * @param parentGalleryView the parentGalleryView to set
      */
-    protected final void setParentGalleryView(GalleryViewInterface parentGalleryView) {
+    protected final void setParentGalleryView(final GalleryViewInterface parentGalleryView) {
         this.parentGalleryView = parentGalleryView;
 
         // get content provider here also
         if( null != parentGalleryView ) {
-            mainContentResolver = parentGalleryView.getGalleryViewContext().getContentResolver();
+            this.mainContentResolver = parentGalleryView.getGalleryViewContext().getContentResolver();
         }
     }
 
@@ -65,18 +66,18 @@ class GalleryWorkTask extends AsyncTask<GalleryContentType, Integer, GalleryWork
      * @return the parentGalleryView
      */
     protected final GalleryViewInterface getParentGalleryView() {
-        return parentGalleryView;
+        return this.parentGalleryView;
     }
 
     @Override
     public String toString() {
-        return ("GalleryWorkTask <" + parentGalleryView.toString() + ">");
+        return ("GalleryWorkTask <" + this.parentGalleryView.toString() + ">");
     }
 
     @Override
-    protected GalleryWorkTaskResult doInBackground(GalleryContentType... params) {
+    protected GalleryWorkTaskResult doInBackground(final GalleryContentType... params) {
         GalleryWorkTaskResult resultProcessing = GalleryWorkTaskResult.GALLERY_RESULT_ERROR;
-        String mediaStorageState = Environment.getExternalStorageState();
+        final String mediaStorageState = Environment.getExternalStorageState();
         Uri uriGalleryContent = null;
 
         Log.i( TAG, "work task bg processing started with media state " + mediaStorageState);
@@ -97,17 +98,17 @@ class GalleryWorkTask extends AsyncTask<GalleryContentType, Integer, GalleryWork
             }
 
             // here we get URI and ready to prepare query, however, need to cancel previous one
-            if( null != mainContentResolver && null == mainContentCursor ) {
-                mainContentCursor = mainContentResolver.query(uriGalleryContent, null, null, null, null);
+            if( null != this.mainContentResolver && null == this.mainContentCursor ) {
+                this.mainContentCursor = this.mainContentResolver.query(uriGalleryContent, null, null, null, null);
             }
 
-            if( null != mainContentCursor ) {
+            if( null != this.mainContentCursor ) {
                 Boolean recordsAvailable = false;
                 int contentCount = 0;
 
                 try {
-                    recordsAvailable = mainContentCursor.moveToFirst();
-                    contentCount = mainContentCursor.getCount();
+                    recordsAvailable = this.mainContentCursor.moveToFirst();
+                    contentCount = this.mainContentCursor.getCount();
 
                     if( recordsAvailable && 0 < contentCount ) {
                         // processing finished
@@ -119,7 +120,7 @@ class GalleryWorkTask extends AsyncTask<GalleryContentType, Integer, GalleryWork
                         Log.e( TAG, "No records available for requested content type");
                     }
                 }
-                catch(Exception e) {
+                catch(final Exception e) {
                     Log.e( TAG, "doInBackground(): " + e.getClass() + " thrown " + e.getMessage());
                 }
             }

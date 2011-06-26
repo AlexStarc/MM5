@@ -26,17 +26,17 @@ package com.sandrstar.android.gallery;
 public class CGalleryConstants {
     private final Integer value;
 
-    private CGalleryConstants(Integer value) {
+    private CGalleryConstants(final Integer value) {
         this.value = value;
     }
 
     @Override
     public String toString() {
-        return value.toString();
+        return this.value.toString();
     }
 
     public Integer value() {
-        return value;
+        return this.value;
     }
 
     public static final CGalleryConstants GALLERY_INVALID_INDEX = new CGalleryConstants(-1);

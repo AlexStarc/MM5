@@ -16,67 +16,67 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ThumbnailsView extends GalleryView<GridView> implements GalleryViewInterface, Handler.Callback {
+public class ThumbnailsView extends GalleryView<GridView> implements Handler.Callback {
     private ImageAdapter mImageAdapter;
     private static final String TAG = "ThumbnailsView";
     private Animation mSelectionAnimation = null;
-    private Integer nFocusIndex = -1;
-    private GalleryOptionsBar optionsBar = null;
-    private ImageView mResizeImage = null;
+    Integer nFocusIndex = -1;
+    GalleryOptionsBar optionsBar = null;
+    ImageView mResizeImage = null;
     private TextView  mFileNameView = null;
     private TextView  mCounterView = null;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(final Bundle savedInstanceState) {
         setContentType(GalleryViewType.GALLERY_THUMBNAILS);
         super.onCreate(savedInstanceState);
 
-        mImageAdapter = new ImageAdapter(this, getContentCursor());
+        this.mImageAdapter = new ImageAdapter(this, getContentCursor());
 
         try {
-            getMainView().setAdapter(mImageAdapter);
+            getMainView().setAdapter(this.mImageAdapter);
             getMainView().setSelector(R.drawable.thumbnail_selector);
 
-            mSelectionAnimation = AnimationUtils.loadAnimation(this, R.anim.thumbnail_selection);
+            this.mSelectionAnimation = AnimationUtils.loadAnimation(this, R.anim.thumbnail_selection);
 
             // set empty tests for text view - name and counter
-            mFileNameView = (TextView)findViewById(R.id.thumbnailItemDisplayName);
-            mFileNameView.setText( " " );
+            this.mFileNameView = (TextView)findViewById(R.id.thumbnailItemDisplayName);
+            this.mFileNameView.setText( " " );
 
-            mCounterView = (TextView)findViewById(R.id.thumbnailCounter);
-            mCounterView.setText( " " );
-        } catch (Exception e) {
+            this.mCounterView = (TextView)findViewById(R.id.thumbnailCounter);
+            this.mCounterView.setText( " " );
+        } catch (final Exception e) {
             Log.e(TAG, "onCreate(): " + e.getClass() + " thrown " + e.getMessage());
         }
 
         // setup options bar
-        optionsBar = new GalleryOptionsBar(this, R.id.thimbnail_optionbar);
-        optionsBar.setOptionsHandler(this);
+        this.optionsBar = new GalleryOptionsBar(this, R.id.thimbnail_optionbar);
+        this.optionsBar.setOptionsHandler(this);
 
-        mResizeImage = (ImageView)findViewById(R.id.imageView1);
+        this.mResizeImage = (ImageView)findViewById(R.id.imageView1);
     }
 
-    private void update(int mSelectItemId, View selectedView){
+    void update(final int mSelectItemId, final View selectedView){
         ImageView imageView = null;
-        Resources mRes = getResources();
+        final Resources mRes = getResources();
 
-        mFileNameView.setText( mImageAdapter.getNameItemId(mSelectItemId, mRes));
+        this.mFileNameView.setText( this.mImageAdapter.getNameItemId(mSelectItemId, mRes));
 
-        mCounterView.setText(String.format("%d/%d", mSelectItemId + 1, mImageAdapter.getCount()));
+        this.mCounterView.setText(String.format("%d/%d", mSelectItemId + 1, this.mImageAdapter.getCount()));
 
         if( null != selectedView && selectedView instanceof ImageView) {
             imageView = (ImageView)selectedView;
         }
 
         if( null != imageView ) {
-            mResizeImage = (ImageView) mImageAdapter.getView(mSelectItemId,
-                                                             mResizeImage,
+            this.mResizeImage = (ImageView) this.mImageAdapter.getView(mSelectItemId,
+                                                             this.mResizeImage,
                                                              null);
-            ViewGroup.LayoutParams zoomedImageLayoutParams = mResizeImage.getLayoutParams();
+            final ViewGroup.LayoutParams zoomedImageLayoutParams = this.mResizeImage.getLayoutParams();
 
             if( zoomedImageLayoutParams instanceof ViewGroup.MarginLayoutParams ) {
-                Integer thumbnailX = getMainView().getLeft() + imageView.getLeft() - ( ImageAdapter.getZoomThumbnailWidth() - imageView.getWidth() ) / 2;
-                Integer thumbnailY = getMainView().getTop() + imageView.getTop() - ( ImageAdapter.getZoomThumbnailHeight() - imageView.getHeight() ) / 2;
+                final Integer thumbnailX = getMainView().getLeft() + imageView.getLeft() - ( ImageAdapter.getZoomThumbnailWidth() - imageView.getWidth() ) / 2;
+                final Integer thumbnailY = getMainView().getTop() + imageView.getTop() - ( ImageAdapter.getZoomThumbnailHeight() - imageView.getHeight() ) / 2;
 
                 ((ViewGroup.MarginLayoutParams)zoomedImageLayoutParams).setMargins(thumbnailX,
                                                                                    thumbnailY,
@@ -84,54 +84,54 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
                                                                                    0);
                 zoomedImageLayoutParams.height = ImageAdapter.getZoomThumbnailWidth();
                 zoomedImageLayoutParams.width = ImageAdapter.getZoomThumbnailHeight();
-                mResizeImage.setLayoutParams(zoomedImageLayoutParams);
+                this.mResizeImage.setLayoutParams(zoomedImageLayoutParams);
             }
 
-            if(null != mSelectionAnimation) {
-                mSelectionAnimation.cancel();
-                mResizeImage.startAnimation(mSelectionAnimation);
+            if(null != this.mSelectionAnimation) {
+                this.mSelectionAnimation.cancel();
+                this.mResizeImage.startAnimation(this.mSelectionAnimation);
             }
 
             // if focus already presented - there's no need to show up options bar
-            if( nFocusIndex < 0 ) {
+            if( this.nFocusIndex < 0 ) {
                 // show options bar
-                optionsBar.showOptionBar();
+                this.optionsBar.showOptionBar();
             }
         }
     }
 
     @Override
-    public void finishedWorkExecution(GalleryWorkTaskResult processingResult) {
+    public void finishedWorkExecution(final GalleryWorkTaskResult processingResult) {
         super.finishedWorkExecution(processingResult);
 
         if( GalleryWorkTaskResult.GALLERY_RESULT_FINISHED == processingResult ) {
 
-            mImageAdapter.setContentCursor(getContentCursor());
+            this.mImageAdapter.setContentCursor(getContentCursor());
 
             getMainView().setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
-                public void onItemSelected(AdapterView<?> arg0, View view,
-                                           int mSelectItemId, long arg3) {
+                public void onItemSelected(final AdapterView<?> arg0, final View view,
+                                           final int mSelectItemId, final long arg3) {
                     update(mSelectItemId, view);
                 }
 
                 @Override
-                public void onNothingSelected(AdapterView<?> arg0) {
+                public void onNothingSelected(final AdapterView<?> arg0) {
                     // nothing to do here
                 }
             });
 
             getMainView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
-                public void onItemClick(AdapterView<?> arg0, View view,
-                                        int mSelectItemId, long arg3) {
+                public void onItemClick(final AdapterView<?> arg0, final View view,
+                                        final int mSelectItemId, final long arg3) {
                     // if the same image has been selected again, open fullscreen view
-                    if( nFocusIndex == mSelectItemId ) {
-                        Intent launchFullScreen = new Intent(getGalleryViewContext(), FullScreenView.class);
-                        startActivity(launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", nFocusIndex));
+                    if( ThumbnailsView.this.nFocusIndex == mSelectItemId ) {
+                        final Intent launchFullScreen = new Intent(getGalleryViewContext(), FullScreenView.class);
+                        startActivity(launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", ThumbnailsView.this.nFocusIndex));
                     } else {
                         update(mSelectItemId, view);
-                        nFocusIndex = mSelectItemId;
+                        ThumbnailsView.this.nFocusIndex = mSelectItemId;
                     }
                 }
             });
@@ -139,23 +139,24 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
             getMainView().setOnScrollListener(new AbsListView.OnScrollListener() {
 
                 @Override
-                public void onScrollStateChanged(AbsListView view, int scrollState) {
-                    if( null != mResizeImage ) {
-                        mResizeImage.setImageBitmap(null);
+                public void onScrollStateChanged(final AbsListView view, final int scrollState) {
+                    if( null != ThumbnailsView.this.mResizeImage ) {
+                        ThumbnailsView.this.mResizeImage.setImageBitmap(null);
 
-                        if(nFocusIndex >= 0) {
+                        if(ThumbnailsView.this.nFocusIndex >= 0) {
                             // reset focus index also
-                            nFocusIndex = -1;
+                            ThumbnailsView.this.nFocusIndex = -1;
 
                             // play animation to hide options bar
-                            optionsBar.hideOptionBar();
+                            ThumbnailsView.this.optionsBar.hideOptionBar();
                         }
                     }
                 }
 
                 @Override
-                public void onScroll(AbsListView view, int firstVisibleItem,
-                                     int visibleItemCount, int totalItemCount) {
+                public void onScroll(final AbsListView view, final int firstVisibleItem,
+                                     final int visibleItemCount, final int totalItemCount) {
+                    // nothing to do here
                 }
             });
         }
@@ -165,15 +166,15 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
      * This is Option handler
      */
     @Override
-    public boolean handleMessage(Message msg) {
+    public boolean handleMessage(final Message msg) {
         boolean retVal = false;
 
         switch(msg.arg1) {
         // VIEW option
         case R.id.viewButton:
-            Intent launchFullScreen = new Intent(getGalleryViewContext(), FullScreenView.class);
-            if(nFocusIndex >= 0) {
-                startActivity( launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", nFocusIndex) );
+            final Intent launchFullScreen = new Intent(getGalleryViewContext(), FullScreenView.class);
+            if(this.nFocusIndex >= 0) {
+                startActivity( launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", this.nFocusIndex) );
             } else {
                 startActivity( launchFullScreen.putExtra("com.teleca.mm5.gallery.FocusIndex", 0) );
             }
@@ -188,10 +189,10 @@ public class ThumbnailsView extends GalleryView<GridView> implements GalleryView
 
         case R.id.infoButton:
             // launch details with extras
-            Intent launchDetails = new Intent(getGalleryViewContext(), DetailsView.class);
+            final Intent launchDetails = new Intent(getGalleryViewContext(), DetailsView.class);
 
-            if(nFocusIndex >= 0) {
-                launchDetails.putExtra("com.teleca.mm5.gallery.FocusIndex", nFocusIndex);
+            if(this.nFocusIndex >= 0) {
+                launchDetails.putExtra("com.teleca.mm5.gallery.FocusIndex", this.nFocusIndex);
             } else {
                 launchDetails.putExtra("com.teleca.mm5.gallery.FocusIndex", 0);
             }

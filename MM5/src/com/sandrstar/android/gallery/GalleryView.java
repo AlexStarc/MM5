@@ -8,7 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.provider.MediaStore.MediaColumns;
 import android.util.Log;
 import android.view.View;
 
@@ -43,7 +43,7 @@ enum GalleryViewType {
     private final Integer mainViewId;
     private final GalleryContentType contentType;
 
-    GalleryViewType(Integer layoutId, Integer mainViewId, GalleryContentType contentType ) {
+    GalleryViewType(final Integer layoutId, final Integer mainViewId, final GalleryContentType contentType ) {
         this.layoutId = layoutId;
         this.contentType = contentType;
         this.mainViewId = mainViewId;
@@ -53,21 +53,21 @@ enum GalleryViewType {
      * @return the viewId
      */
     public Integer layoutId() {
-        return layoutId;
+        return this.layoutId;
     }
 
     /**
      * @return the contentType
      */
     public GalleryContentType contentType() {
-        return contentType;
+        return this.contentType;
     }
 
     /**
      * @return the mainViewId
      */
     public Integer mainViewId() {
-        return mainViewId;
+        return this.mainViewId;
     }
 }
 
@@ -93,24 +93,24 @@ public abstract class GalleryView<V extends View> extends Activity implements Ca
     private GalleryWorkTask galleryWorkBg;
     private Cursor contentCursor;
     private GalleryViewType contentViewType;
-    private final String contentPathField = MediaStore.Images.Media.DATA;
-    private final String contentNameField = MediaStore.Images.Media.DISPLAY_NAME;
+    private final static String contentPathField = MediaColumns.DATA;
+    private final static String contentNameField = MediaColumns.DISPLAY_NAME;
     private final static String TAG = "GalleryView";
 
     @SuppressWarnings("unchecked")
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(contentViewType.layoutId());
+        setContentView(this.contentViewType.layoutId());
 
         try {
-            setMainView((V)findViewById(contentViewType.mainViewId()));
+            setMainView((V)findViewById(this.contentViewType.mainViewId()));
 
-            if( !contentViewType.contentType().equals(GalleryContentType.GALLERY_STATIC) ) {
+            if( !this.contentViewType.contentType().equals(GalleryContentType.GALLERY_STATIC) ) {
                 setGalleryWorkBg( new GalleryWorkTask(this) );
-                galleryWorkBg.execute(contentViewType.contentType());
+                this.galleryWorkBg.execute(this.contentViewType.contentType());
             }
-        } catch(Exception e) {
+        } catch(final Exception e) {
             Log.e( TAG, "onCreate(): " + e.getClass() + " thrown " + e.getMessage());
         }
     }
@@ -119,11 +119,11 @@ public abstract class GalleryView<V extends View> extends Activity implements Ca
     protected void onDestroy() {
         // need additional stop BG work task
         try {
-            if( null != galleryWorkBg )
+            if( null != this.galleryWorkBg )
             {
-                galleryWorkBg.cancel(true);
+                this.galleryWorkBg.cancel(true);
             }
-        } catch(Exception e) {
+        } catch(final Exception e) {
             Log.e( TAG, "onDestroy(): " + e.getClass() + " thrown " + e.getMessage());
         }
         super.onDestroy();
@@ -142,7 +142,7 @@ public abstract class GalleryView<V extends View> extends Activity implements Ca
     /**
      * @param mainView the mainView to set
      */
-    public final void setMainView(V mainView) {
+    public final void setMainView(final V mainView) {
         this.mainView = mainView;
     }
 
@@ -150,13 +150,13 @@ public abstract class GalleryView<V extends View> extends Activity implements Ca
      * @return the mainView
      */
     public final V getMainView() {
-        return mainView;
+        return this.mainView;
     }
 
     /**
      * @param galleryWorkBg the galleryWorkBg to set
      */
-    public final void setGalleryWorkBg(GalleryWorkTask galleryWorkBg) {
+    public final void setGalleryWorkBg(final GalleryWorkTask galleryWorkBg) {
         this.galleryWorkBg = galleryWorkBg;
     }
 
@@ -164,13 +164,13 @@ public abstract class GalleryView<V extends View> extends Activity implements Ca
      * @return the galleryWorkBg
      */
     public final GalleryWorkTask getGalleryWorkBg() {
-        return galleryWorkBg;
+        return this.galleryWorkBg;
     }
 
     /**
      * @param contentType the contentType to set
      */
-    public final void setContentType(GalleryViewType contentType) {
+    public final void setContentType(final GalleryViewType contentType) {
         this.contentViewType = contentType;
     }
 
@@ -178,28 +178,28 @@ public abstract class GalleryView<V extends View> extends Activity implements Ca
      * @return the contentType
      */
     public final GalleryViewType getContentType() {
-        return contentViewType;
+        return this.contentViewType;
     }
 
     /**
      * @return the contentPathField
      */
     public final String getContentPathField() {
-        return contentPathField;
+        return GalleryView.contentPathField;
     }
 
     /**
      * @return the contentNameField
      */
     public final String getContentNameField() {
-        return contentNameField;
+        return GalleryView.contentNameField;
     }
 
     /**
      * @param contentCursor the contentCursor to set
      */
     @Override
-    public final void setContentCursor(Cursor contentCursor) {
+    public final void setContentCursor(final Cursor contentCursor) {
         this.contentCursor = contentCursor;
     }
 
@@ -207,21 +207,21 @@ public abstract class GalleryView<V extends View> extends Activity implements Ca
      * @return the contentCursor
      */
     public final Cursor getContentCursor() {
-        return contentCursor;
+        return this.contentCursor;
     }
 
     @Override
-    public void progressWorkExecution(int NumberFiles) {
+    public void progressWorkExecution(final int NumberFiles) {
         // TODO Auto-generated method stub
     }
 
     @Override
-    public void finishedWorkExecution( GalleryWorkTaskResult processingResult ) {
+    public void finishedWorkExecution( final GalleryWorkTaskResult processingResult ) {
         if(processingResult != GalleryWorkTaskResult.GALLERY_RESULT_FINISHED) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            DialogInterface.OnClickListener clickListener = new DialogInterface.OnClickListener() {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            final DialogInterface.OnClickListener clickListener = new DialogInterface.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialog, int which) {
+                public void onClick(final DialogInterface dialog, final int which) {
                     if(which == DialogInterface.BUTTON_NEUTRAL) {
                         // close dialog by the button
                         GalleryView.this.finish();
